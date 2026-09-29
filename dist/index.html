@@ -205,7 +205,58 @@
     .packet-box textarea { min-height:145px; font:11px/1.45 monospace; color:#acd0cd; }
     .packet-status { padding:11px; border:1px solid var(--line); border-radius:10px; color:var(--muted); font-size:11px; line-height:1.45; background:#09191e; }
     .packet-status.valid { border-color:rgba(134,211,154,.28); color:#a8ddb5; }
+    .wide-modal { width:min(900px,100%); }
+    .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .compare-column { border:1px solid var(--line); border-radius:14px; padding:16px; background:#09191e; }
+    .compare-column.highlight { border-color:rgba(109,229,220,.28); background:linear-gradient(145deg,rgba(109,229,220,.08),#09191e); }
+    .compare-column h3 { margin:7px 0 14px; font:700 17px/1.2 Manrope,sans-serif; }
+    .compare-row { display:grid; grid-template-columns:1fr auto; gap:12px; padding:10px 0; border-top:1px solid var(--line); font-size:12px; }
+    .compare-row span:first-child { color:var(--muted); }
+    .compare-row strong { text-align:right; }
+    .selection-moment { margin-top:14px; padding:14px; border-radius:12px; border:1px solid rgba(255,173,91,.25); background:rgba(255,173,91,.07); color:#f6d7ad; font-size:13px; line-height:1.5; }
+    .step-player { display:flex; gap:7px; align-items:center; margin:14px 0; }
+    .step-player button { width:34px; height:34px; border-radius:50%; border:1px solid var(--line-2); background:#10272d; cursor:pointer; }
+    .step-track { flex:1; display:grid; grid-template-columns:repeat(6,1fr); gap:4px; }
+    .step-segment { height:8px; border:0; border-radius:10px; background:#173139; padding:0; cursor:pointer; overflow:hidden; }
+    .step-segment.done,.step-segment.active { background:var(--cyan); }
+    .step-segment.active { box-shadow:0 0 0 3px rgba(109,229,220,.1); }
+    .replay-stage { display:grid; grid-template-columns:1.1fr .9fr; gap:14px; }
+    .replay-chart { min-height:220px; border:1px solid var(--line); border-radius:14px; background:#08171b; padding:14px; position:relative; overflow:hidden; }
+    .chart-bars { height:150px; display:flex; align-items:end; gap:10px; padding-top:20px; }
+    .chart-bar { flex:1; min-width:24px; background:linear-gradient(180deg,var(--orange),rgba(255,130,88,.18)); border-radius:6px 6px 2px 2px; transition:height .35s; position:relative; }
+    .chart-bar:after { content:attr(data-value); position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:10px; color:#d7e4e4; }
+    .chart-axis { display:flex; justify-content:space-between; color:var(--faint); font-size:9px; margin-top:8px; }
+    .replay-facts { display:grid; gap:8px; }
+    .replay-fact { border:1px solid var(--line); border-radius:11px; padding:11px; background:#0a1b20; }
+    .replay-fact small { color:var(--muted); display:block; font-size:9px; text-transform:uppercase; letter-spacing:.07em; }
+    .replay-fact strong { display:block; margin-top:5px; font-size:13px; }
+    .forecast-control { margin-top:12px; }
+    .forecast-stops { display:flex; justify-content:space-between; color:var(--faint); font-size:9px; }
+    .facility-list { display:grid; gap:6px; margin-top:11px; }
+    .facility { display:grid; grid-template-columns:22px 1fr auto; gap:8px; align-items:center; padding:8px; border:1px solid var(--line); border-radius:9px; background:#09191e; font-size:11px; }
+    .facility i { width:22px; height:22px; border-radius:6px; background:rgba(255,173,91,.1); display:grid; place-items:center; font-style:normal; color:var(--amber); }
+    .facility span { color:var(--muted); }
+    .facility b { font-size:10px; color:#ffb094; }
+    .facility-marker { opacity:0; transition:.25s; }
+    .event-active .facility-marker.visible { opacity:1; }
+    .workflow { display:grid; grid-template-columns:repeat(6,1fr); gap:7px; margin:16px 0 22px; }
+    .workflow-step { border:1px solid var(--line); border-radius:10px; padding:10px 8px; background:#09191e; min-height:76px; }
+    .workflow-step small { color:var(--faint); font-size:9px; }
+    .workflow-step strong { display:block; font-size:11px; margin-top:6px; line-height:1.3; }
+    .workflow-step.done { border-color:rgba(134,211,154,.25); background:rgba(134,211,154,.06); }
+    .workflow-step.active { border-color:rgba(109,229,220,.35); background:var(--cyan-dim); }
+    .workflow-step.active strong { color:var(--cyan); }
+    .resource-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+    .resource-card { border:1px solid var(--line); border-radius:12px; padding:12px; background:#09191e; position:relative; }
+    .resource-rank { position:absolute; right:9px; top:9px; color:var(--cyan); font:700 11px/1 Manrope,sans-serif; }
+    .resource-card strong { display:block; font-size:13px; padding-right:28px; }
+    .resource-card span { display:block; color:var(--muted); font-size:10px; margin-top:5px; line-height:1.35; }
+    .resource-score { margin-top:10px; height:4px; background:#183038; border-radius:4px; overflow:hidden; }
+    .resource-score i { display:block; height:100%; background:linear-gradient(90deg,var(--cyan),var(--amber)); }
+    .api-label { display:inline-flex; align-items:center; gap:5px; color:#9ec9c6; font-size:9px; text-transform:uppercase; letter-spacing:.06em; }
+    .api-label:before { content:""; width:6px; height:6px; border-radius:50%; background:var(--cyan); }
     @media (max-width:620px) { .lab-grid,.packet-box { grid-template-columns:1fr; } .proof-strip { grid-template-columns:1fr 1fr 1fr; } .context-card { grid-template-columns:1fr; } }
+    @media (max-width:700px) { .compare-grid,.replay-stage { grid-template-columns:1fr; } .workflow { grid-template-columns:repeat(2,1fr); } .resource-grid { grid-template-columns:1fr; } }
     @media (max-width: 980px) {
       .workspace { grid-template-columns:1fr; height:auto; }
       .map-column { height:680px; grid-template-rows:minmax(0,1fr) 110px; }
@@ -218,11 +269,11 @@
       .topbar { padding:0 12px; gap:8px; }
       .brand { min-width:0; }
       .brand-name { display:none; }
-      .top-meta .live-pill, .top-meta .demo-pill { display:none; }
+      .top-meta .live-pill, .top-meta .demo-pill, .top-meta .live-context { display:none; }
       .workspace { display:block; }
       .map-column { height:610px; }
       .map-title { width:190px; }
-      .demo-cta { top:auto; bottom:18px; right:16px; }
+      .demo-cta { top:auto; bottom:18px; right:16px; flex-wrap:wrap; justify-content:flex-end; max-width:calc(100% - 32px); }
       .legend { display:none; }
       .map-attrib { right:15px; bottom:5px; }
       .zoom { display:none; }
@@ -249,6 +300,7 @@
       <span class="live-context loading" id="liveContextPill" title="Regional model context from Open-Meteo and CAMS">Loading live context…</span>
       <span class="live-pill"><i class="status-dot"></i><span id="nodeStatus">Node healthy</span></span>
       <span class="demo-pill">Controlled demo data</span>
+      <button class="icon-btn" id="operationsBtn" aria-label="Open response room" title="Response room"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M9 5h6M9 3h6v4H9zM7 5H5v16h14V5h-2M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <button class="icon-btn" id="federationBtn" aria-label="Open federation view" title="Federation view"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><circle cx="19" cy="6" r="3" stroke="currentColor" stroke-width="1.7"/><circle cx="19" cy="18" r="3" stroke="currentColor" stroke-width="1.7"/><path d="m8 11 8-4M8 13l8 4" stroke="currentColor" stroke-width="1.7"/></svg></button>
       <button class="icon-btn" id="reportBtn" aria-label="Submit citizen report" title="Submit citizen report"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
     </div>
@@ -290,12 +342,15 @@
             <g class="marker" transform="translate(203 394)"><circle r="15" fill="#253329" stroke="#f1d76a" stroke-width="2"/><circle r="4" fill="#f1d76a"/><text x="21" y="4" class="sensor-label">79</text></g>
           </g>
           <g class="hidden-event">
-            <ellipse class="plume" cx="320" cy="151" rx="190" ry="47" fill="url(#plumeGrad)" transform="rotate(18 320 151)"/>
+            <ellipse class="plume" id="plumeShape" cx="320" cy="151" rx="92" ry="31" fill="url(#plumeGrad)" transform="rotate(18 320 151)"/>
             <path class="plume" d="M210 142c71 7 127 34 184 77" fill="none" stroke="#ffad5b" stroke-width="2" stroke-dasharray="7 8"/><path class="plume" d="m385 210 12 10-15 1" fill="none" stroke="#ffad5b" stroke-width="2"/>
             <g class="marker" transform="translate(190 118)" id="hotspotMarker"><circle class="pulse" r="24" fill="#ff5d5d"/><circle r="18" fill="#4d2223" stroke="#ff6b65" stroke-width="2.5"/><path d="M0-9c5 6 7 9 7 13a7 7 0 1 1-14 0c0-4 2-7 7-13Z" fill="#ff766f"/><text x="25" y="4" class="sensor-label">165</text></g>
             <g transform="translate(236 143)"><circle r="10" fill="#11292f" stroke="#ffad5b"/><path d="M-4 3h8M-3 0h6M-2-3h4" stroke="#ffad5b" stroke-linecap="round"/><title>Citizen smoke report</title></g>
             <g transform="translate(261 158)"><circle r="10" fill="#11292f" stroke="#ffad5b"/><path d="M-4 3h8M-3 0h6M-2-3h4" stroke="#ffad5b" stroke-linecap="round"/></g>
             <g transform="translate(286 172)"><circle r="10" fill="#11292f" stroke="#ffad5b"/><path d="M-4 3h8M-3 0h6M-2-3h4" stroke="#ffad5b" stroke-linecap="round"/></g>
+            <g class="facility-marker" id="facilitySchool" transform="translate(355 202)"><rect x="-11" y="-11" width="22" height="22" rx="6" fill="#3d2e1d" stroke="#ffad5b"/><text x="0" y="4" text-anchor="middle" fill="#ffcf91" font-size="11" font-weight="700">S</text><title>Government School · predicted exposure</title></g>
+            <g class="facility-marker" id="facilityHospital" transform="translate(412 227)"><rect x="-11" y="-11" width="22" height="22" rx="6" fill="#3d2424" stroke="#ff766f"/><text x="0" y="4" text-anchor="middle" fill="#ff9994" font-size="11" font-weight="700">H</text><title>Hospital · predicted exposure</title></g>
+            <g class="facility-marker" id="facilitySchool2" transform="translate(467 250)"><rect x="-11" y="-11" width="22" height="22" rx="6" fill="#3d2e1d" stroke="#ffad5b"/><text x="0" y="4" text-anchor="middle" fill="#ffcf91" font-size="11" font-weight="700">S</text><title>Public School · predicted exposure</title></g>
           </g>
           <g transform="translate(750 488)"><path d="M0 38V0" stroke="#a8bfc0" stroke-width="2"/><path d="m0 0-7 13M0 0l7 13" stroke="#a8bfc0" stroke-width="2"/><text x="12" y="9" class="sensor-label">NE 11 km/h</text></g>
         </svg>
@@ -304,13 +359,13 @@
           <div class="control-card map-title"><span class="eyebrow">City overview</span><strong id="mapCity">Bengaluru Urban</strong><div class="avg"><span>Citywide AQI</span><b id="cityAqi">82 · Moderate</b></div></div>
           <div class="control-card layer-list" aria-label="Map layers"><button class="layer on" data-layer="aqi">AQI</button><button class="layer on" data-layer="sensors">Sensors</button><button class="layer on" data-layer="reports">Reports</button><button class="layer on" data-layer="satellite">Satellite</button><button class="layer on" data-layer="wind">Wind</button></div>
         </div>
-        <div class="demo-cta"><button class="secondary" id="modelLabBtn">Model lab</button><button class="secondary" id="resetBtn" hidden>Reset</button><button class="primary danger" id="runDemoBtn">Run hidden-event demo</button></div>
+        <div class="demo-cta"><button class="secondary" id="compareBtn">Compare</button><button class="secondary" id="modelLabBtn">Model lab</button><button class="secondary" id="resetBtn" hidden>Reset</button><button class="primary danger" id="runDemoBtn">Run hidden-event demo</button></div>
         <div class="demo-progress" id="demoProgress"><h3 id="progressTitle">Correlating local signals…</h3><p id="progressText">Comparing Peenya against its 30-day hourly baseline.</p><div class="bar"><i id="progressBar"></i></div></div>
         <div class="legend"><span><i style="background:#86d39a"></i> Good</span><span><i style="background:#f1d76a"></i> Moderate</span><span><i style="background:#ff8258"></i> Poor</span><span><i style="background:#ff5d5d"></i> Severe</span></div>
         <div class="map-attrib">Demo geometry · Map context © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a></div>
         <div class="zoom" aria-label="Map zoom"><button aria-label="Zoom in">+</button><button aria-label="Zoom out">−</button></div>
       </div>
-      <div class="timeline"><div class="timeline-head"><h2>Signal timeline · Today</h2><span id="timelineStatus">No abnormal events</span></div><div class="ticks"><div class="tick">08:00<br>Baseline 43</div><div class="tick">09:00<br>Baseline 46</div><div class="tick">10:00<br>Sensor 48</div><div class="tick" id="spikeTick">10:22<br><span id="spikeText">Monitoring</span></div><div class="tick">10:28<br>Reports</div><div class="tick">10:31<br>Correlated</div><div class="tick">11:52<br>Forecast</div></div></div>
+      <div class="timeline"><div class="timeline-head"><h2>Signal timeline · Today</h2><div style="display:flex;align-items:center;gap:9px"><span id="timelineStatus">No abnormal events</span><button class="secondary" id="replayBtn" style="padding:6px 9px">Replay case</button></div></div><div class="ticks"><div class="tick">08:00<br>Baseline 43</div><div class="tick">09:00<br>Baseline 46</div><div class="tick">10:00<br>Sensor 48</div><div class="tick" id="spikeTick">10:22<br><span id="spikeText">Monitoring</span></div><div class="tick">10:28<br>Reports</div><div class="tick">10:31<br>Correlated</div><div class="tick">11:52<br>Forecast</div></div></div>
     </div>
 
     <aside class="side" aria-live="polite">
@@ -328,7 +383,7 @@
           <div class="evidence-row"><div class="evidence-icon">T</div><div class="evidence-text"><strong>Satellite / thermal cue</strong><span id="satEvidence">No relevant cue</span></div><span class="check" id="satCheck">—</span></div>
           <div class="evidence-row"><div class="evidence-icon">W</div><div class="evidence-text"><strong>Meteorology</strong><span>NE wind · 11 km/h · 61% RH</span></div><span class="check">✓</span></div>
         </div></div>
-        <div class="section"><div class="section-title"><h2>90-minute forecast</h2><span>Prototype model</span></div><div class="forecast-box"><strong id="forecastTitle">No localized spread risk</strong><p id="forecastText">Conditions remain within the expected range. Wind-aware projection activates when an anomaly is corroborated.</p><div class="zones" id="zones" hidden><span class="zone">Yeshwanthpur</span><span class="zone">Rajajinagar</span><span class="zone">Malleswaram</span></div></div></div>
+        <div class="section"><div class="section-title"><h2>90-minute forecast</h2><span>Prototype model</span></div><div class="forecast-box"><strong id="forecastTitle">No localized spread risk</strong><p id="forecastText">Conditions remain within the expected range. Wind-aware projection activates when an anomaly is corroborated.</p><div class="zones" id="zones" hidden><span class="zone">Yeshwanthpur</span><span class="zone">Rajajinagar</span><span class="zone">Malleswaram</span></div></div><div class="forecast-control"><input id="plumeSlider" type="range" min="0" max="90" step="30" value="0" disabled aria-label="Forecast minute"><div class="forecast-stops"><span>Now</span><span>+30m</span><span>+60m</span><span>+90m</span></div></div><div class="facility-list" id="facilityList" hidden><div class="facility"><i>S</i><span id="schoolCount">Government school</span><b id="schoolEta">46 min</b></div><div class="facility"><i>H</i><span id="hospitalCount">Community hospital</span><b id="hospitalEta">68 min</b></div><div class="context-source"><span class="api-label" id="facilitySource">Demo geospatial layer</span> · OpenStreetMap lookup is attempted once per city with a local fallback.</div></div></div>
         <div class="section"><div class="section-title"><h2>Recommended response</h2><span>Policy playbook 2.1</span></div><div class="action-box"><strong id="actionTitle">Continue passive monitoring</strong><ol id="actionList"><li>Maintain standard 15-minute sampling.</li><li>Await corroborating evidence.</li></ol></div><div class="button-row"><button class="secondary" id="reportPanelBtn">Add citizen report</button><button class="primary" id="alertBtn" disabled>Generate alert</button></div></div>
         <div class="section"><div class="section-title"><h2>Prototype validation</h2><span>Historical replay set</span></div><div class="proof-strip"><div class="proof"><strong>88%</strong><span>event recall</span></div><div class="proof"><strong>9%</strong><span>false-alert rate</span></div><div class="proof"><strong>14 min</strong><span>median detection</span></div></div><div class="context-source">Illustrative replay of 24 labeled scenarios. Replace with audited city data before operational use.</div></div>
         <div class="source-note"><span>All incident values are controlled demo data.</span><a href="#" id="openFedLink">View shared schema</a></div>
@@ -349,11 +404,15 @@
 
 <div class="modal" id="reportModal"><div class="modal-card"><div class="modal-head"><div><span class="eyebrow">Citizen signal</span><h2>Report local pollution</h2></div><button class="close" id="closeReport" aria-label="Close">×</button></div><form class="form" id="reportForm"><label>Location<input name="location" value="Peenya Industrial Area" required /></label><label>What did you observe?<textarea name="description" required>Strong smoke near industrial road.</textarea></label><label>Optional sensor reading<input name="reading" type="number" inputmode="decimal" placeholder="PM2.5 in µg/m³" /></label><label class="upload">Add a photo for visual evidence<input id="photoInput" type="file" accept="image/*" /><img id="photoPreview" alt="Uploaded pollution evidence preview" /></label><div class="analysis-result" id="imageAnalysis"><strong id="imageAnalysisTitle">Analyzing visible evidence…</strong><span id="imageAnalysisText">The image remains in this browser.</span></div><div class="data-note" style="margin:0">Prototype visual heuristic only. It estimates smoke-like low-saturation haze and is supporting—not definitive—evidence.</div><button class="primary" type="submit">Add report as evidence</button></form></div></div>
 <div class="modal" id="modelLabModal"><div class="modal-card"><div class="modal-head"><div><span class="eyebrow">Explainable detection lab</span><h2>Change the signals</h2></div><button class="close" id="closeModelLab" aria-label="Close">×</button></div><div class="form"><div class="score-box"><div class="score-ring" id="scoreRing"><span id="labScore">18%</span></div><div class="score-copy"><strong id="labDecision">Below alert threshold</strong><span id="labReason">One independent signal. At least two are required to reduce false alerts.</span></div></div><div class="lab-grid"><div class="range-row"><div class="range-head"><span>Local PM2.5</span><output id="pmSliderOut">45 µg/m³</output></div><input id="pmSlider" type="range" min="20" max="220" value="45" /></div><div class="range-row"><div class="range-head"><span>Local baseline</span><output id="baselineSliderOut">45 µg/m³</output></div><input id="baselineSlider" type="range" min="20" max="90" value="45" /></div><div class="range-row"><div class="range-head"><span>Baseline variability</span><output id="sigmaSliderOut">25</output></div><input id="sigmaSlider" type="range" min="8" max="35" value="25" /></div><div class="range-row"><div class="range-head"><span>Wind speed</span><output id="windSliderOut">11 km/h</output></div><input id="windSlider" type="range" min="0" max="30" value="11" /></div><label class="toggle-row">Citizen smoke reports <input id="reportsToggle" type="checkbox" /></label><label class="toggle-row">Satellite thermal cue <input id="satelliteToggle" type="checkbox" /></label></div><button class="primary" id="applyModelBtn">Apply signals to dashboard</button></div></div></div>
+<div class="modal" id="compareModal"><div class="modal-card wide-modal"><div class="modal-head"><div><span class="eyebrow">Decision comparison</span><h2>What the city average misses</h2></div><button class="close" id="closeCompare" aria-label="Close">×</button></div><div class="form"><div class="compare-grid"><div class="compare-column"><span class="eyebrow">Conventional monitoring</span><h3>Citywide AQI view</h3><div class="compare-row"><span>City status</span><strong>82 · Moderate</strong></div><div class="compare-row"><span>Local incident</span><strong>Not identified</strong></div><div class="compare-row"><span>Likely source</span><strong>Unknown</strong></div><div class="compare-row"><span>Exposure forecast</span><strong>Unavailable</strong></div><div class="compare-row"><span>Action</span><strong>Generic advisory</strong></div></div><div class="compare-column highlight"><span class="eyebrow">VayuSetu event intelligence</span><h3>Hyperlocal corroborated view</h3><div class="compare-row"><span>Peenya PM2.5</span><strong>165 µg/m³</strong></div><div class="compare-row"><span>Local incident</span><strong>Critical · 87%</strong></div><div class="compare-row"><span>Likely source</span><strong>Industrial emission</strong></div><div class="compare-row"><span>Exposure forecast</span><strong>18,400 people</strong></div><div class="compare-row"><span>Action</span><strong>Dispatch field unit</strong></div></div></div><div class="selection-moment">Citywide AQI remains moderate while a neighborhood event crosses the intervention threshold. VayuSetu detects the divergence 42 minutes before the macro signal is expected to reflect it.</div><button class="primary" id="compareRunDemo">Run this comparison on the map</button></div></div></div>
+<div class="modal" id="replayModal"><div class="modal-card wide-modal"><div class="modal-head"><div><span class="eyebrow">Labeled scenario replay</span><h2>Peenya corridor · 42-minute early warning</h2></div><button class="close" id="closeReplay" aria-label="Close">×</button></div><div class="form"><div class="data-note" style="margin:0"><strong style="color:var(--ink)">Controlled replay:</strong> realistic values and timing, designed for reproducible evaluation. It is not presented as an audited historical incident.</div><div class="step-player"><button id="replayPlay" aria-label="Play replay">▶</button><div class="step-track" id="replayTrack"><button class="step-segment active" data-step="0" aria-label="Baseline"></button><button class="step-segment" data-step="1" aria-label="Sensor rise"></button><button class="step-segment" data-step="2" aria-label="Anomaly"></button><button class="step-segment" data-step="3" aria-label="Citizen evidence"></button><button class="step-segment" data-step="4" aria-label="Event created"></button><button class="step-segment" data-step="5" aria-label="Macro signal"></button></div><button id="replayReset" aria-label="Reset replay">↺</button></div><div class="replay-stage"><div class="replay-chart"><span class="eyebrow">PM2.5 progression</span><div class="chart-bars" id="replayBars"></div><div class="chart-axis"><span>09:50</span><span>10:32</span></div></div><div class="replay-facts"><div class="replay-fact"><small>Current step</small><strong id="replayStepTitle">Local baseline stable</strong></div><div class="replay-fact"><small>VayuSetu decision</small><strong id="replayDecision">Monitoring</strong></div><div class="replay-fact"><small>Conventional AQI</small><strong id="replayMacro">82 · Moderate</strong></div><div class="replay-fact"><small>Lead gained</small><strong id="replayLead">—</strong></div></div></div></div></div></div>
+<div class="modal" id="operationsModal"><div class="modal-card wide-modal"><div class="modal-head"><div><span class="eyebrow">Authority response room</span><h2>Incident VS-BLR-2407</h2></div><button class="close" id="closeOperations" aria-label="Close">×</button></div><div class="form"><div><div class="section-title"><h2>Response workflow</h2><span id="workflowStatus">Awaiting active event</span></div><div class="workflow" id="workflow"><div class="workflow-step active" data-stage="0"><small>01</small><strong>Detected</strong></div><div class="workflow-step" data-stage="1"><small>02</small><strong>Verified</strong></div><div class="workflow-step" data-stage="2"><small>03</small><strong>Assigned</strong></div><div class="workflow-step" data-stage="3"><small>04</small><strong>Dispatched</strong></div><div class="workflow-step" data-stage="4"><small>05</small><strong>Inspected</strong></div><div class="workflow-step" data-stage="5"><small>06</small><strong>Resolved</strong></div></div><div class="button-row"><button class="secondary" id="workflowBack">Previous stage</button><button class="primary" id="workflowNext">Advance response</button></div></div><div><div class="section-title"><h2>Resource priority</h2><span>Severity × exposure × travel time</span></div><div class="resource-grid"><div class="resource-card"><b class="resource-rank">#1 · 92</b><strong>Mobile Unit KA-07</strong><span>Peenya · 2.8 km · PM sensor + stack sampler</span><div class="resource-score"><i style="width:92%"></i></div></div><div class="resource-card"><b class="resource-rank">#2 · 76</b><strong>Industrial Inspection Team</strong><span>Yeshwanthpur · 5.4 km · compliance authority</span><div class="resource-score"><i style="width:76%"></i></div></div><div class="resource-card"><b class="resource-rank">#3 · 61</b><strong>Health Advisory Cell</strong><span>Remote · schools and hospital notification</span><div class="resource-score"><i style="width:61%"></i></div></div></div></div><div class="data-note"><strong style="color:var(--ink)">Recommended allocation:</strong> send KA-07 first, notify the inspection team in parallel, and hold the advisory cell ready until the +30 minute forecast confirms school exposure.</div></div></div></div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
   const state = {
     active:false, city:'bengaluru', reportCount:0, alertGenerated:false, timer:null, imageScore:null,
+    forecastMinute:0, replayStep:0, replayTimer:null, workflowStage:0, facilityCache:{}, facilityPending:{},
     signals:{pm:45,baseline:45,sigma:25,wind:11,reports:false,satellite:false}
   };
   const $ = (s) => document.querySelector(s);
@@ -399,6 +458,8 @@
     $('#forecastTitle').textContent=active?'Plume may reach 3 residential zones':anomaly?'Forecast held until corroborated':'No localized spread risk';
     $('#forecastText').textContent=active?`NE wind at ${s.wind} km/h may carry elevated particulate matter southeast over 90 minutes. Directional confidence: ${clamp(58+s.wind,60,88)}%.`:anomaly?'A sensor spike alone cannot trigger an authority alert. Add an independent citizen or satellite signal.':'Conditions remain within the expected range. Wind-aware projection activates when an anomaly is corroborated.';
     $('#zones').hidden=!active;
+    $('#plumeSlider').disabled=!active;
+    $('#facilityList').hidden=!active;
     $('#actionTitle').textContent=active?'Inspect the industrial corridor now':anomaly?'Verify with an independent signal':'Continue passive monitoring';
     $('#actionList').innerHTML=active?'<li>Dispatch a mobile monitoring unit to Peenya Gate 2.</li><li>Verify nearby industrial stack operations.</li><li>Prepare a temporary advisory for downwind zones.</li>':anomaly?'<li>Request a second sensor reading.</li><li>Check citizen and satellite evidence before escalation.</li>':'<li>Maintain standard 15-minute sampling.</li><li>Await corroborating evidence.</li>';
     $('#alertBtn').disabled=!active;
@@ -410,12 +471,13 @@
     $('#population').textContent=m.population?m.population.toLocaleString('en-IN'):'—';
     $('#zScore').textContent=`${m.z.toFixed(1)}σ`;
     const markerText=$('#hotspotMarker text'); if(markerText)markerText.textContent=String(s.pm);
+    if(active){updatePlume(state.forecastMinute);loadSensitiveLocations();}else{state.forecastMinute=0;$('#plumeSlider').value=0;$$('.facility-marker').forEach(el=>el.classList.remove('visible'));}
     updateLabScore();
   }
 
   function resetSignals() {
     state.signals={pm:45,baseline:45,sigma:25,wind:11,reports:false,satellite:false};
-    state.reportCount=0; state.imageScore=null; state.alertGenerated=false;
+    state.reportCount=0; state.imageScore=null; state.alertGenerated=false; state.forecastMinute=0; state.workflowStage=0;
     syncLab(); renderDashboard(false);
   }
 
@@ -446,6 +508,40 @@
       $('#contextFreshness').textContent='Retry on reload';$('#livePm').textContent='Unavailable';$('#liveWind').textContent='Unavailable';$('#liveHumidity').textContent='Unavailable';
     }
   }
+
+  function updatePlume(minute) {
+    state.forecastMinute=+minute;$('#plumeSlider').value=state.forecastMinute;
+    const ratio=state.forecastMinute/90,shape=$('#plumeShape');
+    shape.setAttribute('rx',String(Math.round(92+ratio*118)));shape.setAttribute('ry',String(Math.round(31+ratio*25)));shape.setAttribute('cx',String(Math.round(255+ratio*65)));
+    $('#facilitySchool').classList.toggle('visible',state.forecastMinute>=30);
+    $('#facilityHospital').classList.toggle('visible',state.forecastMinute>=60);
+    $('#facilitySchool2').classList.toggle('visible',state.forecastMinute>=90);
+    if(!state.active)return;
+    const exposure=Math.round((5200+state.forecastMinute*147)/100)*100;
+    $('#forecastTitle').textContent=state.forecastMinute===0?'Source area elevated':`+${state.forecastMinute} min · ${exposure.toLocaleString('en-IN')} people in risk corridor`;
+    $('#forecastText').textContent=state.forecastMinute===0?'The incident is localized around the industrial corridor. Drag the timeline to inspect projected impact.':state.forecastMinute<60?'The plume reaches the first school catchment; the hospital remains outside the central uncertainty band.':state.forecastMinute<90?'One school and the community hospital enter the projected uncertainty band.':'Two schools, one hospital and three residential zones fall inside the projected uncertainty band.';
+  }
+  $('#plumeSlider').addEventListener('input',e=>updatePlume(e.target.value));
+
+  async function loadSensitiveLocations() {
+    const city=state.city,cached=state.facilityCache[city];if(cached){applyFacilities(cached);return;}if(state.facilityPending[city])return;state.facilityPending[city]=true;
+    const coords=city==='delhi'?{lat:28.8527,lon:77.0929}:{lat:13.0298,lon:77.5197};
+    $('#facilitySource').textContent='Checking OpenStreetMap…';
+    try {
+      const query=`[out:json][timeout:8];(nwr(around:5000,${coords.lat},${coords.lon})["amenity"~"school|hospital"];);out center 30;`;
+      let data=null;
+      for(const endpoint of ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']){
+        try{const response=await fetch(`${endpoint}?data=${encodeURIComponent(query)}`);if(response.ok){data=await response.json();break;}}catch{}
+      }
+      if(!data)throw new Error('lookup unavailable');
+      const facilities={schools:data.elements.filter(x=>x.tags?.amenity==='school').length,hospitals:data.elements.filter(x=>x.tags?.amenity==='hospital').length,source:'Live OpenStreetMap query'};
+      state.facilityCache[city]=facilities;if(state.city===city)applyFacilities(facilities);
+    } catch {
+      const facilities=city==='delhi'?{schools:7,hospitals:2,source:'Demo fallback layer'}:{schools:5,hospitals:1,source:'Demo fallback layer'};
+      state.facilityCache[city]=facilities;if(state.city===city)applyFacilities(facilities);
+    } finally {state.facilityPending[city]=false;}
+  }
+  function applyFacilities(data){$('#schoolCount').textContent=`${data.schools} schools in lookup sample`;$('#hospitalCount').textContent=`${data.hospitals} hospital${data.hospitals===1?'':'s'} in lookup sample`;$('#facilitySource').textContent=data.source;}
 
   function switchCity(city) {
     state.city=city;$$('.city-btn').forEach(b=>b.classList.toggle('active',b.dataset.city===city));resetSignals();
@@ -495,6 +591,42 @@
     bitmap.close?.();
   }
 
+  const openCompare=()=>$('#compareModal').classList.add('open'),closeCompare=()=>$('#compareModal').classList.remove('open');
+  $('#compareBtn').addEventListener('click',openCompare);$('#closeCompare').addEventListener('click',closeCompare);
+  $('#compareRunDemo').addEventListener('click',()=>{closeCompare();runDemo();});
+
+  const replayData=[
+    {pm:43,title:'Local baseline stable',decision:'Monitoring',macro:'82 · Moderate',lead:'—'},
+    {pm:68,title:'Sensor begins rising',decision:'Within tolerance band',macro:'82 · Moderate',lead:'—'},
+    {pm:121,title:'Local anomaly detected',decision:'Awaiting corroboration',macro:'82 · Moderate',lead:'—'},
+    {pm:154,title:'Citizen smoke reports arrive',decision:'Evidence correlation',macro:'82 · Moderate',lead:'—'},
+    {pm:165,title:'Event threshold crossed',decision:'Critical event · 87%',macro:'82 · Moderate',lead:'42 minutes'},
+    {pm:174,title:'Macro signal finally responds',decision:'Field unit already assigned',macro:'151 · Poor',lead:'42 minutes gained'}
+  ];
+  function renderReplay(step) {
+    state.replayStep=clamp(step,0,replayData.length-1);const row=replayData[state.replayStep];
+    $$('.step-segment').forEach((el,i)=>{el.classList.toggle('done',i<state.replayStep);el.classList.toggle('active',i===state.replayStep);});
+    $('#replayBars').innerHTML=replayData.map((d,i)=>`<div class="chart-bar" data-value="${d.pm}" style="height:${i<=state.replayStep?Math.round(d.pm/1.25):8}px;opacity:${i<=state.replayStep?1:.2}"></div>`).join('');
+    $('#replayStepTitle').textContent=row.title;$('#replayDecision').textContent=row.decision;$('#replayMacro').textContent=row.macro;$('#replayLead').textContent=row.lead;
+    if(state.replayStep===4){state.signals={pm:165,baseline:45,sigma:25,wind:11,reports:true,satellite:true};state.reportCount=3;renderDashboard();}
+  }
+  function stopReplay(){clearInterval(state.replayTimer);state.replayTimer=null;$('#replayPlay').textContent='▶';}
+  function playReplay(){if(state.replayTimer){stopReplay();return;}if(state.replayStep>=replayData.length-1)renderReplay(0);$('#replayPlay').textContent='Ⅱ';state.replayTimer=setInterval(()=>{if(state.replayStep>=replayData.length-1){stopReplay();return;}renderReplay(state.replayStep+1);},900);}
+  const openReplay=()=>{renderReplay(0);$('#replayModal').classList.add('open');},closeReplay=()=>{stopReplay();$('#replayModal').classList.remove('open');};
+  $('#replayBtn').addEventListener('click',openReplay);$('#closeReplay').addEventListener('click',closeReplay);$('#replayPlay').addEventListener('click',playReplay);$('#replayReset').addEventListener('click',()=>{stopReplay();renderReplay(0);});
+  $$('.step-segment').forEach(el=>el.addEventListener('click',()=>{stopReplay();renderReplay(+el.dataset.step);}));
+
+  function renderWorkflow(){
+    $$('.workflow-step').forEach((el,i)=>{el.classList.toggle('done',i<state.workflowStage);el.classList.toggle('active',i===state.workflowStage);});
+    const labels=['Detected · 10:31','Verified by duty analyst','Assigned to KA-07','Unit en route · ETA 8m','Source inspection underway','Resolved · evidence archived'];
+    $('#workflowStatus').textContent=state.active?labels[state.workflowStage]:'Awaiting active event';
+    $('#workflowBack').disabled=!state.active||state.workflowStage===0;$('#workflowNext').disabled=!state.active||state.workflowStage===5;$('#workflowNext').textContent=state.workflowStage===5?'Response complete':'Advance response';
+  }
+  const openOperations=()=>{renderWorkflow();$('#operationsModal').classList.add('open');},closeOperations=()=>$('#operationsModal').classList.remove('open');
+  $('#operationsBtn').addEventListener('click',openOperations);$('#closeOperations').addEventListener('click',closeOperations);
+  $('#workflowNext').addEventListener('click',()=>{if(!state.active){toast('Run the hidden-event demo first');return;}state.workflowStage=clamp(state.workflowStage+1,0,5);renderWorkflow();toast(state.workflowStage===3?'Mobile Unit KA-07 dispatched':'Response workflow updated');});
+  $('#workflowBack').addEventListener('click',()=>{state.workflowStage=clamp(state.workflowStage-1,0,5);renderWorkflow();});
+
   function eventPacket(city='bengaluru') {
     const m=scoreModel();return {schema_version:'1.2',event_id:city==='delhi'?'VS-DL-1192':'VS-BLR-2407',city_node:city==='delhi'?'DL-NCR-01':'KA-BLR-01',timestamp:new Date().toISOString(),location:city==='delhi'?{name:'Narela Industrial Area',lat:28.8527,lon:77.0929}:{name:'Peenya Industrial Area',lat:13.0298,lon:77.5197},pollutants:{pm2_5:city==='delhi'?148:state.signals.pm,unit:'µg/m³'},severity:'critical',predicted_source:city==='delhi'?'waste_burning':'industrial_emission',confidence:city==='delhi'?0.81:m.confidence/100,evidence_summary:{sensor_deviation_sigma:city==='delhi'?3.9:+m.z.toFixed(1),citizen_reports:city==='delhi'?2:Math.max(state.reportCount,state.signals.reports?3:0),satellite_cue:city==='delhi'?false:state.signals.satellite,raw_media_shared:false},forecast:{minutes:90,direction:'SE',population_at_risk:city==='delhi'?12600:m.population||0},recommended_action:'Dispatch mobile monitoring unit and verify local source.',model_version:'anomaly-fusion-0.4-demo'};
   }
@@ -510,12 +642,13 @@
   const openReport=()=>$('#reportModal').classList.add('open'),closeReport=()=>$('#reportModal').classList.remove('open');
   $('#reportBtn').addEventListener('click',openReport);$('#reportPanelBtn').addEventListener('click',openReport);$('#closeReport').addEventListener('click',closeReport);
   $('#reportModal').addEventListener('click',e=>{if(e.target.id==='reportModal')closeReport();});$('#modelLabModal').addEventListener('click',e=>{if(e.target.id==='modelLabModal')closeModelLab();});
+  $('#compareModal').addEventListener('click',e=>{if(e.target.id==='compareModal')closeCompare();});$('#replayModal').addEventListener('click',e=>{if(e.target.id==='replayModal')closeReplay();});$('#operationsModal').addEventListener('click',e=>{if(e.target.id==='operationsModal')closeOperations();});
   $('#photoInput').addEventListener('change',async e=>{const file=e.target.files[0],img=$('#photoPreview');if(!file){img.style.display='none';$('#imageAnalysis').classList.remove('show');state.imageScore=null;return;}img.src=URL.createObjectURL(file);img.style.display='block';try{await analyzePhoto(file,img);}catch{$('#imageAnalysis').classList.add('show');$('#imageAnalysisTitle').textContent='Image analysis unavailable';$('#imageAnalysisText').textContent='The report can still be submitted as unverified citizen evidence.';}});
   $('#reportForm').addEventListener('submit',e=>{e.preventDefault();state.reportCount++;state.signals.reports=true;closeReport();renderDashboard();toast(`Citizen evidence added${state.imageScore!==null?` · visual score ${state.imageScore}%`:''}`);});
   const openFed=()=>$('#federationPanel').classList.add('open'),closeFed=()=>$('#federationPanel').classList.remove('open');
   $('#federationBtn').addEventListener('click',openFed);$('#openFedLink').addEventListener('click',e=>{e.preventDefault();openFed();});$('#closeFederation').addEventListener('click',closeFed);
-  $('#alertBtn').addEventListener('click',()=>{if(!state.active)return;state.alertGenerated=true;$('#alertBtn').textContent='Alert acknowledged';$('#alertBtn').classList.remove('primary');$('#alertBtn').classList.add('secondary');toast('Priority alert VS-BLR-2407 routed to field response');});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeReport();closeFed();closeModelLab();}});
+  $('#alertBtn').addEventListener('click',()=>{if(!state.active)return;state.alertGenerated=true;state.workflowStage=Math.max(state.workflowStage,1);$('#alertBtn').textContent='Alert acknowledged';$('#alertBtn').classList.remove('primary');$('#alertBtn').classList.add('secondary');toast('Priority alert VS-BLR-2407 routed to field response');});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeReport();closeFed();closeModelLab();closeCompare();closeReplay();closeOperations();}});
 
   function registerWebMCP() {
     const ctx=document.modelContext;if(!ctx?.registerTool)return;
@@ -525,8 +658,10 @@
     Promise.resolve(ctx.registerTool({name:'set_detection_signals',title:'Set detection signals',description:'Set prototype PM2.5 and corroborating signals, then update the visible anomaly decision.',inputSchema:{type:'object',properties:{pm2_5:{type:'number',minimum:0,maximum:500},citizen_reports:{type:'boolean'},satellite_cue:{type:'boolean'}},required:['pm2_5'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){if(!input||!Number.isFinite(input.pm2_5))throw new Error('pm2_5 is required');state.signals.pm=input.pm2_5;state.signals.reports=!!input.citizen_reports;state.signals.satellite=!!input.satellite_cue;renderDashboard();return scoreModel();}})).catch(()=>{});
     Promise.resolve(ctx.registerTool({name:'submit_citizen_report',title:'Submit citizen report',description:'Add a citizen-observed pollution signal to the current visible incident evidence.',inputSchema:{type:'object',properties:{description:{type:'string',minLength:3},location:{type:'string',minLength:2}},required:['description','location'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:true},execute(input){if(!input||typeof input.description!=='string'||input.description.trim().length<3)throw new Error('description is required');state.reportCount++;state.signals.reports=true;renderDashboard();return{status:'accepted',report_count:state.reportCount,used_as:'supporting_signal'};}})).catch(()=>{});
     Promise.resolve(ctx.registerTool({name:'acknowledge_active_alert',title:'Acknowledge active alert',description:'Acknowledge the currently detected authority alert.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(){if(!state.active)throw new Error('No active event to acknowledge');state.alertGenerated=true;$('#alertBtn').textContent='Alert acknowledged';return{status:'acknowledged',event_id:'VS-BLR-2407'};}})).catch(()=>{});
+    Promise.resolve(ctx.registerTool({name:'start_incident_replay',title:'Start incident replay',description:'Open and start the labeled six-step early-warning replay.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(){openReplay();playReplay();return{status:'started',steps:6,scenario:'peenya-controlled-replay'};}})).catch(()=>{});
+    Promise.resolve(ctx.registerTool({name:'advance_authority_response',title:'Advance authority response',description:'Advance the active incident through one authority response stage.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(){if(!state.active)throw new Error('No active event');state.workflowStage=clamp(state.workflowStage+1,0,5);renderWorkflow();return{stage:state.workflowStage,status:$('#workflowStatus').textContent};}})).catch(()=>{});
   }
-  registerWebMCP();syncLab();renderDashboard(false);loadLiveContext();
+  registerWebMCP();syncLab();renderReplay(0);renderWorkflow();renderDashboard(false);loadLiveContext();
 </script>
 </body>
 </html>
