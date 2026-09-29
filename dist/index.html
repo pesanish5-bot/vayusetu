@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#081419" />
+  <title>VayuSetu · Hyperlocal pollution intelligence</title>
+  <meta name="description" content="Federated, explainable early warning for hyperlocal pollution events across Indian cities." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23091419'/%3E%3Cpath d='M13 36c10-4 14 7 23 1 6-4 6-14 15-18' fill='none' stroke='%236de5dc' stroke-width='6' stroke-linecap='round'/%3E%3Ccircle cx='49' cy='19' r='6' fill='%23ffad5b'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #e9f3f3; --muted: #8fa8aa; --faint: #60797c; --bg: #071115;
+      --panel: rgba(11,27,32,.94); --line: rgba(168,217,216,.14); --line-2: rgba(168,217,216,.24);
+      --cyan: #6de5dc; --cyan-dim: rgba(109,229,220,.13); --amber: #ffad5b;
+      --red: #ff5d5d; --orange: #ff8258; --green: #86d39a; --yellow: #f1d76a;
+      --shadow: 0 24px 70px rgba(0,0,0,.36); --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: "DM Sans", sans-serif; }
+    body { overflow-x: hidden; }
+    button, input, textarea, select { font: inherit; }
+    button { color: inherit; }
+    .shell { min-height: 100vh; background: radial-gradient(circle at 42% 15%, rgba(24,83,80,.19), transparent 34%), linear-gradient(180deg,#071115,#081317); }
+    .topbar { height: 68px; display:flex; align-items:center; gap:20px; padding:0 24px; border-bottom:1px solid var(--line); background:rgba(7,17,21,.86); backdrop-filter:blur(16px); position:relative; z-index:20; }
+    .brand { display:flex; align-items:center; gap:11px; min-width:190px; }
+    .brand-mark { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:linear-gradient(145deg,#153f42,#0f282d); border:1px solid rgba(109,229,220,.25); }
+    .brand-name { font:700 17px/1 Manrope,sans-serif; letter-spacing:.01em; }
+    .brand-name span { color:var(--cyan); }
+    .city-tabs { display:flex; align-items:center; gap:4px; padding:4px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.025); }
+    .city-btn { border:0; background:transparent; padding:8px 13px; border-radius:8px; color:var(--muted); cursor:pointer; font-weight:600; font-size:13px; }
+    .city-btn.active { color:var(--ink); background:#173038; box-shadow:inset 0 0 0 1px rgba(109,229,220,.12); }
+    .top-meta { margin-left:auto; display:flex; align-items:center; gap:15px; color:var(--muted); font-size:13px; }
+    .live-pill, .demo-pill { display:inline-flex; align-items:center; gap:7px; padding:7px 10px; border:1px solid var(--line); border-radius:999px; white-space:nowrap; }
+    .status-dot { width:7px; height:7px; background:var(--green); border-radius:50%; box-shadow:0 0 0 4px rgba(134,211,154,.09); }
+    .demo-pill { color:#f7d7a7; border-color:rgba(255,173,91,.26); background:rgba(255,173,91,.07); }
+    .icon-btn { width:36px; height:36px; display:grid; place-items:center; background:transparent; border:1px solid var(--line); border-radius:10px; cursor:pointer; }
+    .workspace { display:grid; grid-template-columns:minmax(580px,1fr) 390px; height:calc(100vh - 68px); min-height:690px; }
+    .map-column { min-width:0; display:grid; grid-template-rows:minmax(0,1fr) 120px; }
+    .map-wrap { position:relative; overflow:hidden; border-right:1px solid var(--line); background:#09181d; }
+    .map-canvas { width:100%; height:100%; display:block; }
+    .map-grid { stroke:#173239; stroke-width:.6; opacity:.65; }
+    .district { fill:#0e2228; stroke:#23434a; stroke-width:1.3; transition:.25s; }
+    .district.warm { fill:#203025; }
+    .district.risk { fill:#3a2421; }
+    .road-major { fill:none; stroke:#34515a; stroke-width:5; stroke-linecap:round; opacity:.7; }
+    .road-minor { fill:none; stroke:#29434a; stroke-width:2; opacity:.75; }
+    .road-label, .area-label { fill:#789397; font-size:12px; font-weight:600; letter-spacing:.02em; }
+    .area-label { fill:#a4b9ba; font-size:13px; }
+    .map-controls { position:absolute; left:18px; top:18px; display:flex; flex-direction:column; gap:10px; z-index:6; }
+    .control-card { border:1px solid var(--line); background:rgba(8,22,27,.91); backdrop-filter:blur(12px); border-radius:14px; padding:10px; box-shadow:var(--shadow); }
+    .map-title { width:230px; padding:12px 13px; }
+    .eyebrow { color:var(--muted); text-transform:uppercase; letter-spacing:.13em; font-size:11px; font-weight:700; }
+    .map-title strong { display:block; margin-top:5px; font:700 19px/1.15 Manrope,sans-serif; }
+    .map-title .avg { margin-top:8px; display:flex; align-items:baseline; justify-content:space-between; color:var(--muted); font-size:12px; }
+    .avg b { font-size:16px; color:var(--yellow); }
+    .layer-list { display:flex; gap:5px; flex-wrap:wrap; max-width:310px; }
+    .layer { border:1px solid var(--line); background:#0d242a; border-radius:9px; padding:7px 9px; color:var(--muted); cursor:pointer; font-size:12px; font-weight:600; }
+    .layer.on { color:var(--ink); border-color:rgba(109,229,220,.35); background:rgba(109,229,220,.10); }
+    .zoom { position:absolute; right:18px; bottom:18px; display:grid; gap:5px; z-index:5; }
+    .zoom button { width:38px; height:38px; border:1px solid var(--line); background:rgba(8,22,27,.91); border-radius:10px; cursor:pointer; font-size:18px; }
+    .legend { position:absolute; left:18px; bottom:18px; z-index:5; display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:11px; background:rgba(8,22,27,.9); border:1px solid var(--line); color:var(--muted); font-size:11px; }
+    .legend i { width:9px; height:9px; border-radius:50%; display:inline-block; }
+    .map-attrib { position:absolute; right:70px; bottom:21px; color:#6e898c; font-size:10px; }
+    .map-attrib a { color:inherit; }
+    .marker { cursor:pointer; transform-origin:center; }
+    .marker circle { transition:.25s; }
+    .marker:hover circle:first-child { stroke-width:3; }
+    .pulse { opacity:0; transform-origin:center; }
+    .event-active .pulse { animation:pulse 1.8s infinite; opacity:1; }
+    @keyframes pulse { 0%{transform:scale(.7);opacity:.8} 80%,100%{transform:scale(2.3);opacity:0} }
+    .plume { opacity:0; transform:translate(-14px,-7px); transition:opacity .7s, transform 1s; }
+    .event-active .plume { opacity:.72; transform:translate(0,0); }
+    .hidden-event { opacity:0; pointer-events:none; transition:.45s; }
+    .event-active .hidden-event { opacity:1; pointer-events:auto; }
+    .baseline-event { transition:opacity .3s; }
+    .event-active .baseline-event { opacity:.2; }
+    .sensor-label { fill:#dbe9e9; font-size:11px; font-weight:700; }
+    .timeline { border-right:1px solid var(--line); border-top:1px solid var(--line); padding:15px 20px 12px; background:#09161b; overflow:hidden; }
+    .timeline-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .timeline-head h2 { font:600 13px/1 Manrope,sans-serif; margin:0; }
+    .timeline-head span { color:var(--muted); font-size:11px; }
+    .ticks { display:grid; grid-template-columns:repeat(7,1fr); position:relative; align-items:start; }
+    .ticks:before { content:""; position:absolute; height:1px; background:#284047; left:0; right:0; top:6px; }
+    .tick { position:relative; color:var(--faint); font-size:10px; padding-top:17px; }
+    .tick:before { content:""; width:7px; height:7px; position:absolute; top:3px; left:0; border-radius:50%; background:#35545b; box-shadow:0 0 0 4px #09161b; }
+    .tick.alert:before { background:var(--red); box-shadow:0 0 0 4px #09161b,0 0 0 6px rgba(255,93,93,.18); }
+    .side { min-width:0; background:rgba(8,19,23,.98); overflow:auto; }
+    .side-header { padding:20px 22px 16px; border-bottom:1px solid var(--line); position:sticky; top:0; background:rgba(8,19,23,.96); backdrop-filter:blur(12px); z-index:8; }
+    .side-header-row { display:flex; align-items:center; justify-content:space-between; }
+    .side h1 { margin:5px 0 0; font:700 21px/1.25 Manrope,sans-serif; }
+    .scenario-badge { font-size:10px; font-weight:700; color:#f6c98a; padding:5px 7px; border:1px solid rgba(255,173,91,.25); border-radius:6px; background:rgba(255,173,91,.07); }
+    .side-body { padding:18px 22px 30px; }
+    .summary-card { border:1px solid var(--line); border-radius:15px; padding:16px; background:linear-gradient(145deg,rgba(18,42,47,.7),rgba(10,25,30,.45)); }
+    .summary-top { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
+    .severity { color:var(--yellow); font:700 11px/1 Manrope,sans-serif; letter-spacing:.1em; text-transform:uppercase; }
+    .severity.critical { color:#ff7770; }
+    .confidence { text-align:right; }
+    .confidence strong { display:block; font:700 22px/1 Manrope,sans-serif; }
+    .confidence span { color:var(--muted); font-size:10px; }
+    .summary-card h3 { font:700 17px/1.25 Manrope,sans-serif; margin:9px 0 5px; }
+    .summary-card p { margin:0; color:var(--muted); font-size:13px; line-height:1.5; }
+    .signal-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:14px; }
+    .metric { border:1px solid var(--line); border-radius:11px; padding:11px; background:rgba(5,15,18,.35); }
+    .metric small { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+    .metric strong { display:block; font:700 18px/1.1 Manrope,sans-serif; margin-top:5px; }
+    .metric .up { color:#ff827a; font-size:10px; margin-top:4px; display:block; }
+    .section { padding:17px 0; border-bottom:1px solid var(--line); }
+    .section-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:11px; }
+    .section-title h2 { margin:0; font:700 12px/1 Manrope,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#b8cbcc; }
+    .section-title span { color:var(--muted); font-size:10px; }
+    .evidence { display:grid; gap:10px; }
+    .evidence-row { display:grid; grid-template-columns:28px 1fr auto; gap:9px; align-items:center; }
+    .evidence-icon { width:28px; height:28px; display:grid; place-items:center; border-radius:8px; background:var(--cyan-dim); color:var(--cyan); font-size:13px; }
+    .evidence-text strong { display:block; font-size:12px; font-weight:600; }
+    .evidence-text span { color:var(--muted); font-size:10px; }
+    .check { color:var(--green); font-size:12px; }
+    .forecast-box { border-left:2px solid var(--amber); padding:2px 0 2px 12px; }
+    .forecast-box strong { display:block; font-size:13px; margin-bottom:4px; }
+    .forecast-box p { color:var(--muted); font-size:12px; line-height:1.5; margin:0; }
+    .zones { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+    .zone { padding:5px 7px; border-radius:6px; background:rgba(255,130,88,.09); color:#ffb094; border:1px solid rgba(255,130,88,.17); font-size:10px; }
+    .action-box { padding:14px; border:1px solid rgba(255,93,93,.25); background:rgba(255,93,93,.055); border-radius:12px; }
+    .action-box strong { font-size:13px; }
+    .action-box ol { color:#c6d4d5; font-size:12px; padding-left:17px; line-height:1.55; margin:8px 0 0; }
+    .primary, .secondary { border:0; border-radius:10px; padding:10px 13px; cursor:pointer; font-weight:700; font-size:12px; }
+    .primary { background:var(--cyan); color:#061416; }
+    .primary.danger { background:#ff665f; color:white; }
+    .secondary { border:1px solid var(--line-2); background:#10272d; color:var(--ink); }
+    .button-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:11px; }
+    .demo-cta { position:absolute; top:18px; right:18px; z-index:6; display:flex; align-items:center; gap:10px; }
+    .demo-cta button { box-shadow:0 12px 28px rgba(0,0,0,.3); padding:11px 15px; }
+    .demo-progress { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:9; width:min(420px,80%); background:rgba(7,18,22,.94); border:1px solid rgba(109,229,220,.22); padding:18px; border-radius:15px; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:.3s; }
+    .demo-progress.show { opacity:1; }
+    .demo-progress h3 { margin:0 0 8px; font:700 15px/1.2 Manrope,sans-serif; }
+    .demo-progress p { color:var(--muted); font-size:12px; margin:0 0 12px; }
+    .bar { height:4px; background:#163139; border-radius:10px; overflow:hidden; }
+    .bar i { display:block; height:100%; width:0; background:linear-gradient(90deg,var(--cyan),var(--amber)); transition:width .8s; }
+    .toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%,15px); padding:11px 14px; border:1px solid var(--line-2); background:#10272d; border-radius:11px; z-index:50; opacity:0; transition:.25s; box-shadow:var(--shadow); font-size:13px; pointer-events:none; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,.62); z-index:60; display:none; place-items:center; padding:20px; }
+    .modal.open { display:grid; }
+    .modal-card { width:min(530px,100%); max-height:90vh; overflow:auto; background:#0b1c21; border:1px solid var(--line-2); border-radius:18px; box-shadow:var(--shadow); }
+    .modal-head { display:flex; justify-content:space-between; align-items:flex-start; padding:20px; border-bottom:1px solid var(--line); }
+    .modal-head h2 { margin:5px 0 0; font:700 20px/1.2 Manrope,sans-serif; }
+    .close { border:0; background:transparent; font-size:24px; color:var(--muted); cursor:pointer; }
+    .form { padding:20px; display:grid; gap:14px; }
+    label { font-size:12px; color:#c2d1d2; font-weight:600; }
+    input, textarea, select { width:100%; margin-top:6px; color:var(--ink); background:#08171b; border:1px solid var(--line-2); border-radius:10px; padding:10px 11px; outline:none; }
+    input:focus, textarea:focus, select:focus { border-color:var(--cyan); }
+    textarea { min-height:78px; resize:vertical; }
+    .upload { border:1px dashed rgba(109,229,220,.32); border-radius:12px; padding:14px; text-align:center; color:var(--muted); font-size:12px; }
+    .upload input { border:0; background:transparent; padding:5px; }
+    #photoPreview { max-width:100%; max-height:160px; border-radius:10px; display:none; margin:8px auto 0; }
+    .federation { display:none; position:absolute; inset:76px 24px 24px; z-index:15; background:rgba(8,20,24,.98); border:1px solid var(--line-2); border-radius:20px; box-shadow:var(--shadow); padding:24px; overflow:auto; }
+    .federation.open { display:block; }
+    .fed-head { display:flex; justify-content:space-between; gap:18px; align-items:flex-start; }
+    .fed-head h2 { font:700 23px/1.2 Manrope,sans-serif; margin:6px 0; }
+    .fed-head p { margin:0; color:var(--muted); font-size:13px; max-width:650px; }
+    .node-grid { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:20px; margin:28px 0 22px; }
+    .node { border:1px solid var(--line); border-radius:15px; padding:17px; background:#0d2228; }
+    .node strong { display:block; font:700 17px/1.2 Manrope,sans-serif; margin:7px 0 4px; }
+    .node span { color:var(--muted); font-size:12px; }
+    .node-meta { margin-top:14px; display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
+    .bridge { text-align:center; color:var(--cyan); font-size:22px; }
+    .bridge small { display:block; font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin-top:7px; }
+    .schema { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .schema span { border:1px solid var(--line); padding:9px; border-radius:8px; font:500 11px/1.2 monospace; color:#b9cccc; background:#09191e; }
+    .data-note { margin-top:20px; border-left:2px solid var(--cyan); padding-left:12px; color:var(--muted); font-size:12px; line-height:1.55; }
+    .source-note { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:15px; color:var(--faint); font-size:10px; }
+    .source-note a { color:#8bb7b7; }
+    @media (max-width: 980px) {
+      .workspace { grid-template-columns:1fr; height:auto; }
+      .map-column { height:680px; grid-template-rows:minmax(0,1fr) 110px; }
+      .map-wrap,.timeline { border-right:0; }
+      .side { overflow:visible; }
+      .side-header { position:relative; }
+      .federation { position:fixed; inset:78px 14px 14px; }
+    }
+    @media (max-width: 620px) {
+      .topbar { padding:0 12px; gap:8px; }
+      .brand { min-width:0; }
+      .brand-name { display:none; }
+      .top-meta .live-pill, .top-meta .demo-pill { display:none; }
+      .workspace { display:block; }
+      .map-column { height:610px; }
+      .map-title { width:190px; }
+      .demo-cta { top:auto; bottom:18px; right:16px; }
+      .legend { display:none; }
+      .map-attrib { right:15px; bottom:5px; }
+      .zoom { display:none; }
+      .signal-grid { grid-template-columns:1fr 1fr; }
+      .node-grid { grid-template-columns:1fr; }
+      .bridge { transform:rotate(90deg); margin:4px; }
+      .schema { grid-template-columns:1fr 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) { *,*:before,*:after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <div class="brand" aria-label="VayuSetu home">
+      <div class="brand-mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 14c4-2 6 3 10 1 3-2 2-6 7-8" stroke="#6de5dc" stroke-width="2.4" stroke-linecap="round"/><circle cx="19" cy="7" r="2.5" fill="#ffad5b"/></svg></div>
+      <div class="brand-name">Vayu<span>Setu</span></div>
+    </div>
+    <nav class="city-tabs" aria-label="City node">
+      <button class="city-btn active" data-city="bengaluru">Bengaluru</button>
+      <button class="city-btn" data-city="delhi">Delhi NCR</button>
+    </nav>
+    <div class="top-meta">
+      <span class="live-pill"><i class="status-dot"></i><span id="nodeStatus">Node healthy</span></span>
+      <span class="demo-pill">Controlled demo data</span>
+      <button class="icon-btn" id="federationBtn" aria-label="Open federation view" title="Federation view"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><circle cx="19" cy="6" r="3" stroke="currentColor" stroke-width="1.7"/><circle cx="19" cy="18" r="3" stroke="currentColor" stroke-width="1.7"/><path d="m8 11 8-4M8 13l8 4" stroke="currentColor" stroke-width="1.7"/></svg></button>
+      <button class="icon-btn" id="reportBtn" aria-label="Submit citizen report" title="Submit citizen report"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+  </header>
+
+  <section class="workspace">
+    <div class="map-column">
+      <div class="map-wrap" id="mapWrap">
+        <svg class="map-canvas" viewBox="0 0 900 580" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Operational pollution map of Bengaluru">
+          <defs>
+            <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" class="map-grid" fill="none"/></pattern>
+            <filter id="glow"><feGaussianBlur stdDeviation="7"/></filter>
+            <linearGradient id="plumeGrad" x1="0" x2="1"><stop offset="0" stop-color="#ff5d5d" stop-opacity=".72"/><stop offset="1" stop-color="#ffad5b" stop-opacity="0"/></linearGradient>
+          </defs>
+          <rect width="900" height="580" fill="#09181d"/><rect width="900" height="580" fill="url(#grid)"/>
+          <g id="cityMap">
+            <path class="district" d="M0 22 198 0l52 90-42 105L0 211Z"/><path class="district" d="m198 0 216 0 17 149-223 46 42-105Z"/>
+            <path class="district" d="m414 0 254 0 36 124-273 25Z"/><path class="district warm" d="m668 0 232 0v184l-196-60Z"/>
+            <path class="district warm" d="M0 211 208 195l54 151L0 381Z"/><path class="district" d="m208 195 223-46 109 129-278 68Z"/>
+            <path class="district" d="m431 149 273-25 34 190-198-36Z"/><path class="district" d="m704 124 196 60v180l-162-50Z"/>
+            <path class="district" d="M0 381 262 346l7 234H0Z"/><path class="district" d="m262 346 278-68 64 302H269Z"/>
+            <path class="district" d="m540 278 198 36 80 266H604Z"/><path class="district" d="m738 314 162 50v216h-82Z"/>
+            <path class="road-major" d="M-10 409C160 349 262 364 420 280S699 185 921 199"/>
+            <path class="road-major" d="M274-10c4 128 68 203 157 285s81 186 92 315"/>
+            <path class="road-minor" d="M84 93c116 69 197 68 311 39s231-36 405 30"/>
+            <path class="road-minor" d="M29 269c187-4 304 48 421 113s236 100 450 61"/>
+            <path class="road-minor" d="M138 580c-4-100 70-166 167-232s174-165 174-348"/>
+            <path class="road-minor" d="M648 0c-17 124-53 183-130 248s-86 177-72 332"/>
+            <text x="352" y="296" class="area-label" id="centerLabel">CENTRAL BENGALURU</text>
+            <text x="83" y="160" class="area-label" id="industrialLabel">PEENYA INDUSTRIAL AREA</text>
+            <text x="663" y="103" class="area-label" id="eastLabel">WHITEFIELD</text>
+            <text x="88" y="336" class="area-label">VIJAYANAGAR</text><text x="625" y="434" class="area-label">HSR LAYOUT</text>
+            <text x="460" y="246" class="road-label">Outer Ring Road</text><text x="284" y="69" class="road-label" transform="rotate(78 284 69)">Tumkur Road</text>
+          </g>
+          <g id="baselineMarkers" class="baseline-event">
+            <g class="marker" transform="translate(390 250)"><circle r="15" fill="#102f34" stroke="#6de5dc" stroke-width="2"/><circle r="4" fill="#6de5dc"/><text x="21" y="4" class="sensor-label">48</text></g>
+            <g class="marker" transform="translate(670 205)"><circle r="15" fill="#253329" stroke="#f1d76a" stroke-width="2"/><circle r="4" fill="#f1d76a"/><text x="21" y="4" class="sensor-label">84</text></g>
+            <g class="marker" transform="translate(566 418)"><circle r="15" fill="#15332b" stroke="#86d39a" stroke-width="2"/><circle r="4" fill="#86d39a"/><text x="21" y="4" class="sensor-label">62</text></g>
+            <g class="marker" transform="translate(203 394)"><circle r="15" fill="#253329" stroke="#f1d76a" stroke-width="2"/><circle r="4" fill="#f1d76a"/><text x="21" y="4" class="sensor-label">79</text></g>
+          </g>
+          <g class="hidden-event">
+            <ellipse class="plume" cx="320" cy="151" rx="190" ry="47" fill="url(#plumeGrad)" transform="rotate(18 320 151)"/>
+            <path class="plume" d="M210 142c71 7 127 34 184 77" fill="none" stroke="#ffad5b" stroke-width="2" stroke-dasharray="7 8"/><path class="plume" d="m385 210 12 10-15 1" fill="none" stroke="#ffad5b" stroke-width="2"/>
+            <g class="marker" transform="translate(190 118)" id="hotspotMarker"><circle class="pulse" r="24" fill="#ff5d5d"/><circle r="18" fill="#4d2223" stroke="#ff6b65" stroke-width="2.5"/><path d="M0-9c5 6 7 9 7 13a7 7 0 1 1-14 0c0-4 2-7 7-13Z" fill="#ff766f"/><text x="25" y="4" class="sensor-label">165</text></g>
+            <g transform="translate(236 143)"><circle r="10" fill="#11292f" stroke="#ffad5b"/><path d="M-4 3h8M-3 0h6M-2-3h4" stroke="#ffad5b" stroke-linecap="round"/><title>Citizen smoke report</title></g>
+            <g transform="translate(261 158)"><circle r="10" fill="#11292f" stroke="#ffad5b"/><path d="M-4 3h8M-3 0h6M-2-3h4" stroke="#ffad5b" stroke-linecap="round"/></g>
+            <g transform="translate(286 172)"><circle r="10" fill="#11292f" stroke="#ffad5b"/><path d="M-4 3h8M-3 0h6M-2-3h4" stroke="#ffad5b" stroke-linecap="round"/></g>
+          </g>
+          <g transform="translate(750 488)"><path d="M0 38V0" stroke="#a8bfc0" stroke-width="2"/><path d="m0 0-7 13M0 0l7 13" stroke="#a8bfc0" stroke-width="2"/><text x="12" y="9" class="sensor-label">NE 11 km/h</text></g>
+        </svg>
+
+        <div class="map-controls">
+          <div class="control-card map-title"><span class="eyebrow">City overview</span><strong id="mapCity">Bengaluru Urban</strong><div class="avg"><span>Citywide AQI</span><b id="cityAqi">82 · Moderate</b></div></div>
+          <div class="control-card layer-list" aria-label="Map layers"><button class="layer on" data-layer="aqi">AQI</button><button class="layer on" data-layer="sensors">Sensors</button><button class="layer on" data-layer="reports">Reports</button><button class="layer on" data-layer="satellite">Satellite</button><button class="layer on" data-layer="wind">Wind</button></div>
+        </div>
+        <div class="demo-cta"><button class="secondary" id="resetBtn" hidden>Reset</button><button class="primary danger" id="runDemoBtn">Run hidden-event demo</button></div>
+        <div class="demo-progress" id="demoProgress"><h3 id="progressTitle">Correlating local signals…</h3><p id="progressText">Comparing Peenya against its 30-day hourly baseline.</p><div class="bar"><i id="progressBar"></i></div></div>
+        <div class="legend"><span><i style="background:#86d39a"></i> Good</span><span><i style="background:#f1d76a"></i> Moderate</span><span><i style="background:#ff8258"></i> Poor</span><span><i style="background:#ff5d5d"></i> Severe</span></div>
+        <div class="map-attrib">Demo geometry · Map context © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a></div>
+        <div class="zoom" aria-label="Map zoom"><button aria-label="Zoom in">+</button><button aria-label="Zoom out">−</button></div>
+      </div>
+      <div class="timeline"><div class="timeline-head"><h2>Signal timeline · Today</h2><span id="timelineStatus">No abnormal events</span></div><div class="ticks"><div class="tick">08:00<br>Baseline 43</div><div class="tick">09:00<br>Baseline 46</div><div class="tick">10:00<br>Sensor 48</div><div class="tick" id="spikeTick">10:22<br><span id="spikeText">Monitoring</span></div><div class="tick">10:28<br>Reports</div><div class="tick">10:31<br>Correlated</div><div class="tick">11:52<br>Forecast</div></div></div>
+    </div>
+
+    <aside class="side" aria-live="polite">
+      <div class="side-header"><div class="side-header-row"><div><span class="eyebrow">Event intelligence</span><h1 id="eventTitle">Monitoring local conditions</h1></div><span class="scenario-badge">SIMULATED</span></div></div>
+      <div class="side-body">
+        <div class="summary-card">
+          <div class="summary-top"><div><span class="severity" id="severity">No active event</span><h3 id="eventType">Peenya corridor stable</h3><p id="eventLocation">Peenya Industrial Area · Bengaluru</p></div><div class="confidence"><strong id="confidence">—</strong><span>confidence</span></div></div>
+          <div class="signal-grid"><div class="metric"><small>Local PM2.5</small><strong id="pmValue">45 <small>µg/m³</small></strong><span class="up" id="pmDelta" style="color:var(--muted)">Within baseline</span></div><div class="metric"><small>Citywide AQI</small><strong id="avgValue">82</strong><span class="up" style="color:var(--yellow)">Moderate overall</span></div></div>
+        </div>
+        <div class="section"><div class="section-title"><h2>Corroborating evidence</h2><span id="evidenceCount">1 of 4 signals</span></div><div class="evidence">
+          <div class="evidence-row"><div class="evidence-icon">S</div><div class="evidence-text"><strong>Local sensor network</strong><span id="sensorEvidence">Stable · 45 µg/m³</span></div><span class="check">✓</span></div>
+          <div class="evidence-row"><div class="evidence-icon">C</div><div class="evidence-text"><strong>Citizen reports</strong><span id="citizenEvidence">No nearby reports</span></div><span class="check" id="citizenCheck">—</span></div>
+          <div class="evidence-row"><div class="evidence-icon">T</div><div class="evidence-text"><strong>Satellite / thermal cue</strong><span id="satEvidence">No relevant cue</span></div><span class="check" id="satCheck">—</span></div>
+          <div class="evidence-row"><div class="evidence-icon">W</div><div class="evidence-text"><strong>Meteorology</strong><span>NE wind · 11 km/h · 61% RH</span></div><span class="check">✓</span></div>
+        </div></div>
+        <div class="section"><div class="section-title"><h2>90-minute forecast</h2><span>Prototype model</span></div><div class="forecast-box"><strong id="forecastTitle">No localized spread risk</strong><p id="forecastText">Conditions remain within the expected range. Wind-aware projection activates when an anomaly is corroborated.</p><div class="zones" id="zones" hidden><span class="zone">Yeshwanthpur</span><span class="zone">Rajajinagar</span><span class="zone">Malleswaram</span></div></div></div>
+        <div class="section"><div class="section-title"><h2>Recommended response</h2><span>Policy playbook 2.1</span></div><div class="action-box"><strong id="actionTitle">Continue passive monitoring</strong><ol id="actionList"><li>Maintain standard 15-minute sampling.</li><li>Await corroborating evidence.</li></ol></div><div class="button-row"><button class="secondary" id="reportPanelBtn">Add citizen report</button><button class="primary" id="alertBtn" disabled>Generate alert</button></div></div>
+        <div class="source-note"><span>All incident values are controlled demo data.</span><a href="#" id="openFedLink">View shared schema</a></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="federation" id="federationPanel" aria-modal="true" role="dialog" aria-labelledby="fedTitle">
+    <div class="fed-head"><div><span class="eyebrow">Federated intelligence layer</span><h2 id="fedTitle">Local data. Shared event language.</h2><p>Each city keeps raw sensor and citizen data inside its node. Only normalized events, aggregate evidence, and model updates cross the bridge.</p></div><button class="close" id="closeFederation" aria-label="Close">×</button></div>
+    <div class="node-grid"><div class="node"><span class="eyebrow">KA-BLR-01</span><strong>Bengaluru Node</strong><span>18 sensor feeds · 12 districts · local citizen evidence</span><div class="node-meta"><span>Schema v1.2</span><span style="color:var(--green)">Healthy</span></div></div><div class="bridge">⇄<small>signed event packets</small></div><div class="node"><span class="eyebrow">DL-NCR-01</span><strong>Delhi NCR Node</strong><span>26 sensor feeds · 11 districts · local citizen evidence</span><div class="node-meta"><span>Schema v1.2</span><span style="color:var(--green)">Healthy</span></div></div></div>
+    <div class="section-title"><h2>Shared PollutionEvent schema</h2><span>Raw photos and personal data remain local</span></div>
+    <div class="schema"><span>event_id</span><span>city_node</span><span>timestamp</span><span>location / area</span><span>pollutants</span><span>severity</span><span>predicted_source</span><span>confidence</span><span>evidence_summary</span><span>forecast</span><span>recommended_action</span><span>model_version</span></div>
+    <div class="data-note"><strong style="color:var(--ink)">What is implemented:</strong> two city nodes, one interoperable schema, local-to-shared event transformation, and model-version visibility. <strong style="color:var(--ink)">What is future:</strong> privacy-preserving federated model training and production state-to-state resource coordination.</div>
+  </section>
+</main>
+
+<div class="modal" id="reportModal"><div class="modal-card"><div class="modal-head"><div><span class="eyebrow">Citizen signal</span><h2>Report local pollution</h2></div><button class="close" id="closeReport" aria-label="Close">×</button></div><form class="form" id="reportForm"><label>Location<input name="location" value="Peenya Industrial Area" required /></label><label>What did you observe?<textarea name="description" required>Strong smoke near industrial road.</textarea></label><label>Optional sensor reading<input name="reading" type="number" inputmode="decimal" placeholder="PM2.5 in µg/m³" /></label><label class="upload">Add a photo for visual evidence<input id="photoInput" type="file" accept="image/*" /><img id="photoPreview" alt="Uploaded pollution evidence preview" /></label><div class="data-note" style="margin:0">Demo only: the photo remains in this browser. Visible smoke can support an incident but is never treated as proof by itself.</div><button class="primary" type="submit">Add report as evidence</button></form></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+  const state = { active:false, city:'bengaluru', reportCount:0, alertGenerated:false, timer:null };
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  const toast = (message) => { const el=$('#toast'); el.textContent=message; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2400); };
+
+  function setEvent(active) {
+    state.active=active;
+    $('#mapWrap').classList.toggle('event-active',active);
+    $('#resetBtn').hidden=!active;
+    $('#runDemoBtn').textContent=active?'Replay detection':'Run hidden-event demo';
+    $('#eventTitle').textContent=active?'Hidden hotspot detected':'Monitoring local conditions';
+    $('#severity').textContent=active?'Critical severity':'No active event';
+    $('#severity').classList.toggle('critical',active);
+    $('#eventType').textContent=active?'Industrial emission suspected':'Peenya corridor stable';
+    $('#confidence').textContent=active?'87%':'—';
+    $('#pmValue').innerHTML=active?'165 <small>µg/m³</small>':'45 <small>µg/m³</small>';
+    $('#pmDelta').textContent=active?'↑ 267% above local baseline':'Within baseline';
+    $('#pmDelta').style.color=active?'#ff827a':'var(--muted)';
+    $('#evidenceCount').textContent=active?'4 of 4 signals':'1 of 4 signals';
+    $('#sensorEvidence').textContent=active?'Spike · 165 vs 45 baseline':'Stable · 45 µg/m³';
+    $('#citizenEvidence').textContent=active?`${Math.max(3,state.reportCount)} smoke reports within 900 m`:'No nearby reports';
+    $('#citizenCheck').textContent=active?'✓':'—';
+    $('#satEvidence').textContent=active?'Low-confidence thermal anomaly nearby':'No relevant cue';
+    $('#satCheck').textContent=active?'✓':'—';
+    $('#forecastTitle').textContent=active?'Plume may reach 3 residential zones':'No localized spread risk';
+    $('#forecastText').textContent=active?'NE wind may carry elevated particulate matter southeast over the next 90 minutes. Directional confidence: 74%.':'Conditions remain within the expected range. Wind-aware projection activates when an anomaly is corroborated.';
+    $('#zones').hidden=!active;
+    $('#actionTitle').textContent=active?'Inspect the industrial corridor now':'Continue passive monitoring';
+    $('#actionList').innerHTML=active?'<li>Dispatch a mobile monitoring unit to Peenya Gate 2.</li><li>Verify nearby industrial stack operations.</li><li>Prepare a temporary advisory for downwind zones.</li>':'<li>Maintain standard 15-minute sampling.</li><li>Await corroborating evidence.</li>';
+    $('#alertBtn').disabled=!active;
+    $('#alertBtn').textContent=state.alertGenerated?'Alert acknowledged':'Generate alert';
+    $('#spikeTick').classList.toggle('alert',active);
+    $('#spikeText').textContent=active?'PM2.5 165':'Monitoring';
+    $('#timelineStatus').textContent=active?'Event VS-BLR-2407 · Detected 10:31':'No abnormal events';
+  }
+
+  function runDemo() {
+    clearTimeout(state.timer); setEvent(false); state.alertGenerated=false;
+    const box=$('#demoProgress'), bar=$('#progressBar'); box.classList.add('show'); bar.style.width='18%';
+    $('#progressTitle').textContent='Local anomaly detected'; $('#progressText').textContent='PM2.5 is 267% above Peenya’s hourly baseline.';
+    setTimeout(()=>{ bar.style.width='58%'; $('#progressTitle').textContent='Correlating independent signals'; $('#progressText').textContent='3 citizen reports + thermal cue + downwind conditions.'; },650);
+    setTimeout(()=>{ bar.style.width='100%'; $('#progressTitle').textContent='Incident confidence crossed threshold'; $('#progressText').textContent='Likely industrial emission · 87% confidence.'; },1400);
+    state.timer=setTimeout(()=>{ box.classList.remove('show'); setEvent(true); toast('Critical hyperlocal event detected in Peenya'); },2200);
+  }
+
+  function switchCity(city) {
+    state.city=city; $$('.city-btn').forEach(b=>b.classList.toggle('active',b.dataset.city===city));
+    if(city==='delhi') {
+      clearTimeout(state.timer); setEvent(false); $('#mapCity').textContent='Delhi NCR'; $('#cityAqi').textContent='146 · Poor'; $('#avgValue').textContent='146';
+      $('#centerLabel').textContent='CENTRAL DELHI'; $('#industrialLabel').textContent='NARELA INDUSTRIAL AREA'; $('#eastLabel').textContent='GHAZIABAD';
+      $('#eventLocation').textContent='Narela Industrial Area · Delhi'; $('#eventType').textContent='Narela corridor stable'; $('#nodeStatus').textContent='Node healthy · DL-NCR-01';
+      toast('Delhi node loaded · Same event schema v1.2');
+    } else {
+      $('#mapCity').textContent='Bengaluru Urban'; $('#cityAqi').textContent='82 · Moderate'; $('#avgValue').textContent='82';
+      $('#centerLabel').textContent='CENTRAL BENGALURU'; $('#industrialLabel').textContent='PEENYA INDUSTRIAL AREA'; $('#eastLabel').textContent='WHITEFIELD';
+      $('#eventLocation').textContent='Peenya Industrial Area · Bengaluru'; $('#eventType').textContent='Peenya corridor stable'; $('#nodeStatus').textContent='Node healthy · KA-BLR-01';
+      toast('Bengaluru node loaded · Controlled demo ready');
+    }
+  }
+
+  $('#runDemoBtn').addEventListener('click',runDemo);
+  $('#resetBtn').addEventListener('click',()=>{ clearTimeout(state.timer); state.alertGenerated=false; setEvent(false); toast('Scenario reset to baseline'); });
+  $$('.city-btn').forEach(b=>b.addEventListener('click',()=>switchCity(b.dataset.city)));
+  $$('.layer').forEach(b=>b.addEventListener('click',()=>b.classList.toggle('on')));
+  const openReport=()=>$('#reportModal').classList.add('open'); const closeReport=()=>$('#reportModal').classList.remove('open');
+  $('#reportBtn').addEventListener('click',openReport); $('#reportPanelBtn').addEventListener('click',openReport); $('#closeReport').addEventListener('click',closeReport);
+  $('#reportModal').addEventListener('click',e=>{if(e.target.id==='reportModal')closeReport();});
+  $('#photoInput').addEventListener('change',e=>{ const file=e.target.files[0], img=$('#photoPreview'); if(!file){img.style.display='none';return;} img.src=URL.createObjectURL(file); img.style.display='block'; });
+  $('#reportForm').addEventListener('submit',e=>{e.preventDefault();state.reportCount++;closeReport();toast('Citizen report added as a supporting signal'); if(state.active){$('#citizenEvidence').textContent=`${Math.max(3,state.reportCount)} smoke reports within 900 m`;} });
+  const openFed=()=>$('#federationPanel').classList.add('open'); const closeFed=()=>$('#federationPanel').classList.remove('open');
+  $('#federationBtn').addEventListener('click',openFed); $('#openFedLink').addEventListener('click',e=>{e.preventDefault();openFed();}); $('#closeFederation').addEventListener('click',closeFed);
+  $('#alertBtn').addEventListener('click',()=>{ if(!state.active)return; state.alertGenerated=true; $('#alertBtn').textContent='Alert acknowledged'; $('#alertBtn').classList.remove('primary'); $('#alertBtn').classList.add('secondary'); toast('Priority alert VS-BLR-2407 routed to field response'); });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeReport();closeFed();}});
+
+  function registerWebMCP() {
+    const ctx=document.modelContext; if(!ctx?.registerTool)return;
+    const validateCity=(input)=>{if(!input||!['bengaluru','delhi'].includes(input.city))throw new Error('city must be bengaluru or delhi');return input.city;};
+    Promise.resolve(ctx.registerTool({name:'trigger_pollution_demo',title:'Run hidden pollution event',description:'Run the controlled Peenya scenario and reveal the correlated pollution event on the visible dashboard.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(){runDemo();return{status:'started',scenario:'peenya-industrial-emission'};}})).catch(()=>{});
+    Promise.resolve(ctx.registerTool({name:'select_city_node',title:'Select city node',description:'Switch the visible federated climate intelligence dashboard to Bengaluru or Delhi.',inputSchema:{type:'object',properties:{city:{type:'string',enum:['bengaluru','delhi']}},required:['city'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){const city=validateCity(input);switchCity(city);return{selected_city:city,schema_version:'1.2'};}})).catch(()=>{});
+    Promise.resolve(ctx.registerTool({name:'submit_citizen_report',title:'Submit citizen report',description:'Add a citizen-observed pollution signal to the current visible incident evidence.',inputSchema:{type:'object',properties:{description:{type:'string',minLength:3},location:{type:'string',minLength:2}},required:['description','location'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:true},execute(input){if(!input||typeof input.description!=='string'||input.description.trim().length<3)throw new Error('description is required');state.reportCount++;if(state.active)$('#citizenEvidence').textContent=`${Math.max(3,state.reportCount)} smoke reports within 900 m`;toast('Citizen report added as a supporting signal');return{status:'accepted',report_count:state.reportCount,used_as:'supporting_signal'};}})).catch(()=>{});
+    Promise.resolve(ctx.registerTool({name:'acknowledge_active_alert',title:'Acknowledge active alert',description:'Acknowledge the currently detected authority alert after the pollution demo has run.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(){if(!state.active)throw new Error('No active event to acknowledge');state.alertGenerated=true;$('#alertBtn').textContent='Alert acknowledged';return{status:'acknowledged',event_id:'VS-BLR-2407'};}})).catch(()=>{});
+  }
+  registerWebMCP(); setEvent(false);
+</script>
+</body>
+</html>
