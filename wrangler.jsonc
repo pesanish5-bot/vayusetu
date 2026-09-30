@@ -1,0 +1,1 @@
+{"name":"prana-net-preview","main":"dist/server/index.js","compatibility_date":"2026-09-01","d1_databases":[{"binding":"DB","database_name":"prana-preview","database_id":"local-only","migrations_dir":"drizzle"}],"r2_buckets":[{"binding":"BUCKET","bucket_name":"prana-preview-media"}]}

@@ -1,0 +1,7 @@
+node_modules/
+.wrangler/
+dist/server/
+dist/.openai/
+dist/drizzle/
+*.tar.gz
+.sites-runtime/

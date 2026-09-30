@@ -327,12 +327,15 @@
     <nav class="city-tabs" aria-label="City node">
       <button class="city-btn active" data-city="bengaluru">Bengaluru</button>
       <button class="city-btn" data-city="delhi">Delhi NCR</button>
+      <button class="city-btn" data-city="mumbai">Mumbai</button>
+      <button class="city-btn" data-city="hyderabad">Hyderabad</button>
     </nav>
     <nav class="view-nav" aria-label="Operational views">
       <button class="view-btn active" id="commandViewBtn">Command</button>
       <button class="view-btn" id="evidenceViewBtn">Evidence</button>
       <button class="view-btn" id="forecastViewBtn">Forecast</button>
       <button class="view-btn" id="federationViewBtn">Federation</button>
+      <button class="view-btn" id="pilotViewBtn">Pilot tools</button>
     </nav>
     <div class="top-meta">
       <span class="live-context loading" id="liveContextPill" title="Regional model context from Open-Meteo and CAMS">Loading live context…</span>
@@ -523,6 +526,7 @@
   }
 
   function resetSignals() {
+    pilot.incident=null;pilot.source='Scenario';
     state.signals={pm:45,baseline:45,sigma:25,wind:11,reports:false,satellite:false};
     state.reportCount=0; state.imageScore=null; state.alertGenerated=false; state.forecastMinute=0; state.workflowStage=0;
     syncLab(); renderDashboard(false);
@@ -531,26 +535,28 @@
   function runDemo() {
     clearTimeout(state.timer); resetSignals();
     const box=$('#demoProgress'),bar=$('#progressBar');box.classList.add('show');bar.style.width='18%';
-    $('#progressTitle').textContent='Local anomaly detected';$('#progressText').textContent='PM2.5 is 6.2σ above Peenya’s hourly baseline.';
+    $('#progressTitle').textContent='Scenario anomaly detected';$('#progressText').textContent='Synthetic PM2.5 rise compared with the local baseline.';
     setTimeout(()=>{bar.style.width='58%';$('#progressTitle').textContent='Correlating independent signals';$('#progressText').textContent='4 citizen photos + UVAI/thermal cue + wind alignment.';},650);
-    setTimeout(()=>{bar.style.width='100%';$('#progressTitle').textContent='Incident confidence crossed threshold';$('#progressText').textContent='Pyrolysis combustion · 94.2% joint confidence.';},1400);
+    setTimeout(()=>{bar.style.width='100%';$('#progressTitle').textContent='Rule threshold crossed';$('#progressText').textContent='Synthetic evidence flags support operator review.';},1400);
     state.timer=setTimeout(()=>{state.signals={pm:168,baseline:45,sigma:20,wind:11,reports:true,satellite:true};state.reportCount=4;syncLab();box.classList.remove('show');renderDashboard();toast('High-priority anomaly assembled in 6 minutes');},2200);
   }
 
   async function loadLiveContext() {
-    const coords=state.city==='delhi'?{lat:28.7041,lon:77.1025}:{lat:12.9716,lon:77.5946};
+    const selectedCity=state.city,coords=cityConfig[state.city];
     const pill=$('#liveContextPill');pill.className='live-context loading';pill.textContent='Loading live context…';
     try {
       const aq=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coords.lat}&longitude=${coords.lon}&current=pm2_5,pm10,us_aqi&timezone=auto`;
       const wx=`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=wind_speed_10m,wind_direction_10m,relative_humidity_2m&timezone=auto`;
       const [aqr,wxr]=await Promise.all([fetch(aq),fetch(wx)]); if(!aqr.ok||!wxr.ok)throw new Error('source unavailable');
       const [a,w]=await Promise.all([aqr.json(),wxr.json()]);
+      if(state.city!==selectedCity)return;
       $('#livePm').textContent=`${Math.round(a.current.pm2_5)} µg/m³`;
       $('#liveWind').textContent=`${Math.round(w.current.wind_speed_10m)} km/h · ${Math.round(w.current.wind_direction_10m)}°`;
       $('#liveHumidity').textContent=`${Math.round(w.current.relative_humidity_2m)}%`;
       $('#contextFreshness').textContent=`Updated ${new Date(w.current.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
       pill.className='live-context';pill.textContent=`Live context · PM2.5 ${Math.round(a.current.pm2_5)}`;
     } catch(error) {
+      if(state.city!==selectedCity)return;
       pill.className='live-context error';pill.textContent='Live context unavailable';
       $('#contextFreshness').textContent='Retry on reload';$('#livePm').textContent='Unavailable';$('#liveWind').textContent='Unavailable';$('#liveHumidity').textContent='Unavailable';
     }
@@ -572,7 +578,7 @@
 
   async function loadSensitiveLocations() {
     const city=state.city,cached=state.facilityCache[city];if(cached){applyFacilities(cached);return;}if(state.facilityPending[city])return;state.facilityPending[city]=true;
-    const coords=city==='delhi'?{lat:28.8527,lon:77.0929}:{lat:13.0298,lon:77.5197};
+    const coords=cityConfig[city];
     $('#facilitySource').textContent='Checking OpenStreetMap…';
     try {
       const query=`[out:json][timeout:8];(nwr(around:5000,${coords.lat},${coords.lon})["amenity"~"school|hospital"];);out center 30;`;
@@ -610,6 +616,7 @@
     $('#reportsToggle').checked=s.reports;$('#satelliteToggle').checked=s.satellite;updateLabScore();
   }
   function readLab() {
+    pilot.source='Manual model inputs';pilot.incident=null;
     state.signals={pm:+$('#pmSlider').value,baseline:+$('#baselineSlider').value,sigma:+$('#sigmaSlider').value,wind:+$('#windSlider').value,reports:$('#reportsToggle').checked,satellite:$('#satelliteToggle').checked};
   }
   function updateLabScore() {
@@ -633,7 +640,7 @@
     const pixels=data.length/4,avgSat=sat/pixels,avgLum=lum/pixels,lowSat=clamp(1-avgSat*2.2,0,1),mid=clamp(1-Math.abs(avgLum-.62)/.62,0,1);
     const score=clamp(Math.round(lowSat*60+mid*25-8),5,92);state.imageScore=score;
     const quality=bitmap.width>=900&&bitmap.height>=600?'High':bitmap.width>=480&&bitmap.height>=320?'Medium':'Low';
-    $('#imageAnalysisTitle').textContent=`Smoke-like haze likelihood: ${score}%`;
+    $('#imageAnalysisTitle').textContent=`Image haze heuristic: ${score}/100`;
     $('#imageAnalysisText').textContent=`Image quality: ${quality}. Low-saturation haze is treated only as supporting evidence.`;
     bitmap.close?.();
   }
@@ -647,8 +654,8 @@
     {pm:92,title:'14:04 · Four citizen photos arrive',decision:'Visual evidence matched',macro:'78 · Moderate',lead:'2 min'},
     {pm:126,title:'14:05 · Downwind sensor begins rise',decision:'Spatial sequence confirmed',macro:'78 · Moderate',lead:'3 min'},
     {pm:151,title:'14:06 · Sentinel UVAI +2.8σ',decision:'Remote cue aligned',macro:'78 · Moderate',lead:'4 min'},
-    {pm:168,title:'14:07 · Source classified',decision:'Pyrolysis · 94.2%',macro:'78 · Moderate',lead:'5 min'},
-    {pm:168,title:'14:08 · Enforcement alert ready',decision:'Squad 04 · ETA 12 min',macro:'78 · Moderate',lead:'6 min'}
+    {pm:168,title:'14:07 · Evidence rule satisfied',decision:'Scenario · review required',macro:'78 · Scenario AQI',lead:'5 min'},
+    {pm:168,title:'14:08 · Case ready for review',decision:'Operator response simulation',macro:'78 · Scenario AQI',lead:'6 min'}
   ];
   function renderReplay(step) {
     state.replayStep=clamp(step,0,replayData.length-1);const row=replayData[state.replayStep];
@@ -671,8 +678,8 @@
   }
   const openOperations=()=>{renderWorkflow();$('#operationsModal').classList.add('open');},closeOperations=()=>$('#operationsModal').classList.remove('open');
   $('#operationsBtn').addEventListener('click',openOperations);$('#closeOperations').addEventListener('click',closeOperations);
-  $('#workflowNext').addEventListener('click',()=>{if(!state.active){toast('Run the hidden-event demo first');return;}state.workflowStage=clamp(state.workflowStage+1,0,5);renderWorkflow();toast(state.workflowStage===3?'KSPCB Squad 04 dispatched':'Response workflow updated');});
-  $('#workflowBack').addEventListener('click',()=>{state.workflowStage=clamp(state.workflowStage-1,0,5);renderWorkflow();});
+  $('#workflowNext').addEventListener('click',()=>saveWorkflow(clamp(state.workflowStage+1,0,5)));
+  $('#workflowBack').addEventListener('click',()=>saveWorkflow(clamp(state.workflowStage-1,0,5)));
 
   function eventPacket(city='bengaluru') {
     const m=scoreModel();return {schema_version:'1.2',event_id:city==='delhi'?'PRN-DL-1192':'PRN-BLR-0041',city_node:city==='delhi'?'DL-NCR-01':'KA-BLR-01',timestamp:new Date().toISOString(),location:city==='delhi'?{name:'Narela Industrial Area',lat:28.8527,lon:77.0929}:{name:'Peenya Ward 41',lat:13.0298,lon:77.5197},pollutants:{pm2_5:city==='delhi'?148:state.signals.pm,unit:'µg/m³'},severity:'critical',predicted_source:city==='delhi'?'waste_burning':'pyrolysis_combustion',confidence:city==='delhi'?0.81:(state.signals.pm===168?0.942:m.confidence/100),evidence_summary:{sensor_deviation_sigma:city==='delhi'?3.9:+m.z.toFixed(1),citizen_reports:city==='delhi'?2:Math.max(state.reportCount,state.signals.reports?4:0),satellite_cue:city==='delhi'?false:state.signals.satellite,raw_media_shared:false},forecast:{minutes:90,direction:'NE',population_at_risk:city==='delhi'?12600:114500},recommended_action:'Dispatch KSPCB Squad 04, issue geofenced advisory, and inspect three flagged units.',model_version:'prana-fusion-0.5-demo'};
@@ -691,7 +698,7 @@
   $('#reportModal').addEventListener('click',e=>{if(e.target.id==='reportModal')closeReport();});$('#modelLabModal').addEventListener('click',e=>{if(e.target.id==='modelLabModal')closeModelLab();});
   $('#compareModal').addEventListener('click',e=>{if(e.target.id==='compareModal')closeCompare();});$('#replayModal').addEventListener('click',e=>{if(e.target.id==='replayModal')closeReplay();});$('#operationsModal').addEventListener('click',e=>{if(e.target.id==='operationsModal')closeOperations();});
   $('#photoInput').addEventListener('change',async e=>{const file=e.target.files[0],img=$('#photoPreview');if(!file){img.style.display='none';$('#imageAnalysis').classList.remove('show');state.imageScore=null;return;}img.src=URL.createObjectURL(file);img.style.display='block';try{await analyzePhoto(file,img);}catch{$('#imageAnalysis').classList.add('show');$('#imageAnalysisTitle').textContent='Image analysis unavailable';$('#imageAnalysisText').textContent='The report can still be submitted as unverified citizen evidence.';}});
-  $('#reportForm').addEventListener('submit',e=>{e.preventDefault();state.reportCount++;state.signals.reports=true;closeReport();renderDashboard();toast(`Citizen evidence added${state.imageScore!==null?` · visual score ${state.imageScore}%`:''}`);});
+  $('#reportForm').addEventListener('submit',e=>{e.preventDefault();saveCitizenReport();});
   const openFed=()=>$('#federationPanel').classList.add('open'),closeFed=()=>$('#federationPanel').classList.remove('open');
   $('#federationBtn').addEventListener('click',openFed);$('#openFedLink').addEventListener('click',e=>{e.preventDefault();openFed();});$('#closeFederation').addEventListener('click',closeFed);
   const setActiveView=(id)=>$$('.view-btn').forEach(btn=>btn.classList.toggle('active',btn.id===id));
@@ -704,16 +711,17 @@
 
   function registerWebMCP() {
     const ctx=document.modelContext;if(!ctx?.registerTool)return;
-    const validateCity=(input)=>{if(!input||!['bengaluru','delhi'].includes(input.city))throw new Error('city must be bengaluru or delhi');return input.city;};
+    const validateCity=(input)=>{if(!input||!Object.hasOwn(cityConfig,input.city))throw new Error('Unknown city');return input.city;};
     Promise.resolve(ctx.registerTool({name:'trigger_pollution_demo',title:'Run hidden pollution event',description:'Run the controlled Peenya scenario and reveal the correlated pollution event on the visible dashboard.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(){runDemo();return{status:'started',scenario:'peenya-industrial-emission'};}})).catch(()=>{});
-    Promise.resolve(ctx.registerTool({name:'select_city_node',title:'Select city node',description:'Switch the visible federated dashboard to Bengaluru or Delhi.',inputSchema:{type:'object',properties:{city:{type:'string',enum:['bengaluru','delhi']}},required:['city'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){const city=validateCity(input);switchCity(city);return{selected_city:city,schema_version:'1.2'};}})).catch(()=>{});
+    Promise.resolve(ctx.registerTool({name:'select_city_node',title:'Select city node',description:'Switch the dashboard city.',inputSchema:{type:'object',properties:{city:{type:'string',enum:['bengaluru','delhi','mumbai','hyderabad']}},required:['city'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){const city=validateCity(input);switchCity(city);return{selected_city:city,schema_version:'1.2'};}})).catch(()=>{});
     Promise.resolve(ctx.registerTool({name:'set_detection_signals',title:'Set detection signals',description:'Set prototype PM2.5 and corroborating signals, then update the visible anomaly decision.',inputSchema:{type:'object',properties:{pm2_5:{type:'number',minimum:0,maximum:500},citizen_reports:{type:'boolean'},satellite_cue:{type:'boolean'}},required:['pm2_5'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(input){if(!input||!Number.isFinite(input.pm2_5))throw new Error('pm2_5 is required');state.signals.pm=input.pm2_5;state.signals.reports=!!input.citizen_reports;state.signals.satellite=!!input.satellite_cue;renderDashboard();return scoreModel();}})).catch(()=>{});
-    Promise.resolve(ctx.registerTool({name:'submit_citizen_report',title:'Submit citizen report',description:'Add a citizen-observed pollution signal to the current visible incident evidence.',inputSchema:{type:'object',properties:{description:{type:'string',minLength:3},location:{type:'string',minLength:2}},required:['description','location'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:true},execute(input){if(!input||typeof input.description!=='string'||input.description.trim().length<3)throw new Error('description is required');state.reportCount++;state.signals.reports=true;renderDashboard();return{status:'accepted',report_count:state.reportCount,used_as:'supporting_signal'};}})).catch(()=>{});
+    Promise.resolve(ctx.registerTool({name:'submit_citizen_report',title:'Submit citizen report',description:'Save a citizen report in this private Site.',inputSchema:{type:'object',properties:{description:{type:'string',minLength:3},location:{type:'string',minLength:2}},required:['description','location'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:true},async execute(input){if(!input||typeof input.description!=='string'||input.description.trim().length<3)throw new Error('description is required');const row=await createRecord('report',{description:input.description,location:input.location,verification:'unverified'});state.reportCount++;state.signals.reports=true;renderDashboard();loadRecords();return{status:'saved',id:row.id};}})).catch(()=>{});
     Promise.resolve(ctx.registerTool({name:'acknowledge_active_alert',title:'Acknowledge active alert',description:'Acknowledge the currently detected authority alert.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(){if(!state.active)throw new Error('No active event to acknowledge');state.alertGenerated=true;$('#alertBtn').textContent='Response room open';return{status:'acknowledged',event_id:'PRN-BLR-0041'};}})).catch(()=>{});
     Promise.resolve(ctx.registerTool({name:'start_incident_replay',title:'Start incident replay',description:'Open and start the labeled six-step early-warning replay.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(){openReplay();playReplay();return{status:'started',steps:6,scenario:'peenya-controlled-replay'};}})).catch(()=>{});
-    Promise.resolve(ctx.registerTool({name:'advance_authority_response',title:'Advance authority response',description:'Advance the active incident through one authority response stage.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute(){if(!state.active)throw new Error('No active event');state.workflowStage=clamp(state.workflowStage+1,0,5);renderWorkflow();return{stage:state.workflowStage,status:$('#workflowStatus').textContent};}})).catch(()=>{});
+    Promise.resolve(ctx.registerTool({name:'advance_authority_response',title:'Advance authority response',description:'Save one response stage for the active incident.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},async execute(){if(!state.active)throw new Error('No active event');await saveWorkflow(clamp(state.workflowStage+1,0,5));return{stage:state.workflowStage,status:$('#workflowStatus').textContent};}})).catch(()=>{});
   }
-  registerWebMCP();syncLab();renderReplay(0);renderWorkflow();renderDashboard(false);loadLiveContext();
+  syncLab();renderReplay(0);renderWorkflow();renderDashboard(false);
 </script>
+<script src="/features.js"></script>
 </body>
 </html>
