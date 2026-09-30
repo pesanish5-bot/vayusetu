@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 if(process.stdin.isTTY)process.stdin.setRawMode(true);
 process.stdin.setEncoding('utf8');
 console.log('Ready for hidden source credential on stdin.');
-let input=await new Promise(resolve=>{let data='';process.stdin.on('data',chunk=>{data+=chunk;if(data.includes('\n')){process.stdin.pause();resolve(data.slice(0,data.indexOf('\n')));}});});
+let input=await new Promise(resolve=>{let data='';process.stdin.on('data',chunk=>{if(chunk.includes('\u0003'))process.exit(1);data+=chunk;const end=data.search(/[\r\n]/);if(end>=0){process.stdin.pause();resolve(data.slice(0,end));}});});
 if(process.stdin.isTTY)process.stdin.setRawMode(false);
 const credential=JSON.parse(input);
 if(!credential.token||!credential.remote_url||!credential.branch)throw new Error('Missing source credential');
