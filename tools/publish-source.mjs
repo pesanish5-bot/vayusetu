@@ -1,6 +1,10 @@
 // Temporary repository credentials are accepted only on stdin, never written to disk.
 import { spawnSync } from 'node:child_process';
-let input='';for await(const chunk of process.stdin)input+=chunk;
+if(process.stdin.isTTY)process.stdin.setRawMode(true);
+process.stdin.setEncoding('utf8');
+console.log('Ready for hidden source credential on stdin.');
+let input=await new Promise(resolve=>{let data='';process.stdin.on('data',chunk=>{data+=chunk;if(data.includes('\n')){process.stdin.pause();resolve(data.slice(0,data.indexOf('\n')));}});});
+if(process.stdin.isTTY)process.stdin.setRawMode(false);
 const credential=JSON.parse(input);
 if(!credential.token||!credential.remote_url||!credential.branch)throw new Error('Missing source credential');
 const env={...process.env,GIT_CONFIG_COUNT:'1',GIT_CONFIG_KEY_0:'http.extraHeader',GIT_CONFIG_VALUE_0:'Authorization: Basic '+Buffer.from('oauth2:'+credential.token).toString('base64')};
