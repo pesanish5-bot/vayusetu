@@ -5,3 +5,8 @@ dist/.openai/
 dist/drizzle/
 *.tar.gz
 .sites-runtime/
+.env
+.env.*
+!.env.example
+*.log
+qa-*.png
