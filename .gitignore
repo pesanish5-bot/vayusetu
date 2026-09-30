@@ -10,3 +10,8 @@ dist/drizzle/
 !.env.example
 *.log
 qa-*.png
+
+.vercel
+api/assets/
+vercel-public/
+.env*
